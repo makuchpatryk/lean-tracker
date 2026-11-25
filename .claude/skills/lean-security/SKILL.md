@@ -80,7 +80,7 @@ Start the background checks first, then go area by area. Read the code at each t
 
 **5. Business logic and fair play**
 - The server owns the values that matter: `user_id`, visibility (`is_shared`), ordering of recents (20 cap), conflict resolution; the client sends intent only
-- Last-write-wins abuse: a client `updated_at` far in the future would win every later conflict forever; confirm the server bounds it (ARCHITECTURE AD9); also a past timestamp cannot resurrect a deleted row incorrectly
+- Last-write-wins abuse: a client `updated_at` far in the future would win every later conflict forever; confirm the server bounds it (not written in the docs yet: a finding if missing); also a past timestamp cannot resurrect a deleted row incorrectly
 - Races and double-apply: sync pushes are idempotent (client UUIDs); read-modify-write atomic; the recents cap and favorites uniqueness under concurrent syncs
 - Replay and ordering: a replayed push cannot undo a newer change
 - Hidden information not leaked: private products, other users' entries, soft-deleted rows
@@ -148,7 +148,7 @@ Start the background checks first, then go area by area. Read the code at each t
 
 ### Lean mode: extra layer
 
-Runs on top of Phase 1 and changes nothing in it. Read `docs/PRD.md` (business rules BR-001, BR-007, BR-009, BR-014, BR-017; FR-001, FR-005 to FR-008, FR-013, FR-016; NFR-004, NFR-007; §14 auth; §15 integrations; §18.2 DevOps; §7 risks; §10.3 out of scope; §23 future scope; the decisions log), `docs/ARCHITECTURE.md` (Invariants, Errors, Testing, Deployment, decisions AD1+, Open items) and `docs/CODE_QUALITY.md`.
+Runs on top of Phase 1 and changes nothing in it. Read `docs/PRD.md` (business rules BR-001, BR-007, BR-009, BR-014, BR-017; FR-001, FR-005 to FR-008, FR-013, FR-016; NFR-004, NFR-007; §14 auth; §15 integrations; §18.2 DevOps; §7 risks; §10.3 out of scope; §23 future scope; the decisions log), `docs/ARCHITECTURE.md` (dependency rules, cross-layer flow, enforcement, decisions AD1+) and `docs/CODE_QUALITY.md`.
 
 - **Check each project control, don't assume it.** Controls the docs promise and the audit must confirm in code:
   - JWT verification (`apps/api/internal/platform/`, the `auth` module): JWKS signature, `exp`, `aud`; algorithm pinned; `sub` is the only source of `user_id`; every route except `GET /health` behind it; a failure answers 401 `UNAUTHORIZED` before any handler runs (NFR-004)

@@ -87,14 +87,14 @@ Do NOT ask for things the plan already specifies. Do NOT ask for subjective pref
 Before coding:
 0. **Read the docs first**, all three, as binding constraints:
    - `docs/PRD.md`: business rules (§5), processes (§6), user flows and exact UI strings (§11), functional requirements and acceptance criteria (§12), data model (§13), auth (§14), integrations (§15), platforms and UI (§16), NFRs (§17), stack and architecture (§18), decisions log (§20), future scope (§23, not built)
-   - `docs/ARCHITECTURE.md`: layout, dependency rules, invariants, errors, testing, deployment, decisions AD1+, open items
+   - `docs/ARCHITECTURE.md`: principles, layers, layout, modules, dependency rules, cross-layer flow, enforcement, decisions AD1+, open items
    - `docs/CODE_QUALITY.md`: principles, single sources of truth, working agreements, review checklist
 
    Which app, module and layer each change belongs in, the rules the code must satisfy. For UI steps, take layout, colors and fonts from the DESIGN.html board the plan names (4 MB bundle: search it with a small script or ask the user for the values; do not Read it whole) and exact texts from PRD §11. If the plan conflicts with any of them, stop and ask (Phase 4) instead of silently picking a side.
 1. **Explore existing code**: Read relevant folders to understand current structure, patterns, imports. If the area has no code yet, follow ARCHITECTURE.md §Layout (and PRD §18).
 2. **Match style**: Examine existing code for:
    - Naming and exported API (few exports, typed; the module's public file exports only what others need)
-   - Error handling (closed error codes from ARCHITECTURE §Errors, typed domain errors, not message strings)
+   - Error handling (typed domain errors mapped only in `transport`, ARCHITECTURE §Cross-layer flow; closed error codes from `contracts/openapi`; not message strings)
    - Test structure (names state the rule and cite BR-/FR-; table-driven in Go)
    - Flutter conventions (view models hold state, widgets send intents, ARB keys instead of literals, `Semantics` on interactive elements)
 3. **List dependencies**: Note new packages the plan requires; add them to `pubspec.yaml` / `go.mod`. Mind CODE_QUALITY's KISS rule and the owner-approval rule for anything outside PRD §18

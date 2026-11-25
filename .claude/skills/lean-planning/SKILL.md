@@ -29,7 +29,7 @@ Don't assume—**ask until you're certain**. If user gives vague answers, drill 
 Run two full, independent tracks in parallel — same message, single response block:
 
 **Track A (you, main agent):**
-0. Read before exploring: `docs/PRD.md` (business rules §5, processes §6, scope §10, user flows §11, functional requirements §12, data model §13, auth §14, integrations §15, platforms and UI §16, NFRs §17, stack, architecture and DevOps §18, milestones §19, decisions log §20, future scope §23), `docs/ARCHITECTURE.md` (drivers, layout, dependency rules, invariants, errors, testing, deployment, decisions AD1+, open items) and `docs/CODE_QUALITY.md` (principles, single sources of truth, working agreements, review checklist). The plan must fit all three; where it can't, the deviation is stated explicitly in the plan.
+0. Read before exploring: `docs/PRD.md` (business rules §5, processes §6, scope §10, user flows §11, functional requirements §12, data model §13, auth §14, integrations §15, platforms and UI §16, NFRs §17, stack, architecture and DevOps §18, milestones §19, decisions log §20, future scope §23), `docs/ARCHITECTURE.md` (principles, layers, layout, modules, dependency rules, cross-layer flow, enforcement, decisions AD1+, open items) and `docs/CODE_QUALITY.md` (principles, single sources of truth, working agreements, review checklist). The plan must fit all three; where it can't, the deviation is stated explicitly in the plan.
    For UI work, name the DESIGN.html board the plan follows. `docs/DESIGN.html` is a 4 MB bundle: never Read it whole; search it with a small script or ask the user for values.
 1. Use Explore agent (medium breadth) to understand:
    - What exists today in `apps/mobile/`, `apps/api/`, `contracts/openapi/`, `db/migrations/`, `.github/workflows/`
@@ -82,7 +82,7 @@ Describe how the solution works end-to-end (screen → view model → use case �
 
 ### Fit with Project Docs
 - **PRD**: which BR-/FR-/NFR-/UF-/BP- ids the change implements or touches; any rule bent, with the reason.
-- **ARCHITECTURE.md**: which app, module and layer each change lives in; which dependency rules and invariants apply (isolation, snapshot, sync, offline matrix, auth, secrets). Any deviation, with the reason.
+- **ARCHITECTURE.md**: which app, module and layer each change lives in; which principles and dependency rules apply (layers, module boundaries, ports, composition root, contract first); the product rules that apply come from the PRD (isolation, snapshot, sync, offline matrix, auth, secrets). Any deviation, with the reason.
 - **CODE_QUALITY.md**: how the design stays KISS and YAGNI, keeps one source of truth per the single-sources table, and keeps concerns separated. Name any rule being bent and why.
 - **Docs to update**: PRD sections (decisions log §20, open questions §21, milestones §19) and ARCHITECTURE.md / CODE_QUALITY.md sections (decisions, open items, known debt) the change makes stale.
 

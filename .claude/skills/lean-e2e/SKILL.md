@@ -10,7 +10,7 @@ Use when the user wants a new integration test, or a new case in an existing one
 
 This skill is NOT for unit tests (those go with the code, `lean-implement`), for planning a feature, or for reviewing code. It writes Flutter integration tests only. Asking for this skill is the explicit request that lifts the "no integration tests" default of `CLAUDE.md`; running the test still needs the user's selection in Phase 3.
 
-Integration tests run on a device or emulator, locally. They are not part of CI (PRD D-30, ARCHITECTURE §Testing).
+Integration tests run on a device or emulator, locally. They are not part of CI (PRD D-30, PRD §18).
 
 **The user decides what is checked.** The skill's job is to make that decision exact, then encode it. It never invents expected behavior from reading the code: the code says what the app does, the user says what it should do. If they differ, that is a question for the user.
 
@@ -25,7 +25,7 @@ Read, from `<repo>`:
 1. `apps/mobile/pubspec.yaml` (`integration_test` and `flutter_test` dev dependencies), `apps/mobile/analysis_options.yaml`, the root `Makefile`
 2. `apps/mobile/integration_test/`: the existing tests and any `support/` helpers (app launcher with test overrides, fake API client, fake OFF/barcode source, fake clock, in-memory or temporary Drift database, sign-in bypass, pump helpers). Know what exists before proposing anything new. Find the closest test and use it as the style template
 3. `apps/mobile/lib/app/`: where dependencies are wired, so the test replaces the network, the clock, the scanner and the notifications with fakes through the composition root, never by editing product code
-4. `docs/ARCHITECTURE.md` §Testing and decisions, and `docs/CODE_QUALITY.md`. `docs/PRD.md` only for the requirement ids the user names, and PRD §11 for exact UI strings (`docs/DESIGN.html` is a 4 MB bundle: do not Read it whole)
+4. `docs/ARCHITECTURE.md` (layers and composition root, so fakes are injected the right way) and `docs/CODE_QUALITY.md` (Tests). `docs/PRD.md` only for the requirement ids the user names, and PRD §11 for exact UI strings (`docs/DESIGN.html` is a 4 MB bundle: do not Read it whole)
 
 ### Phase 1: Take the request, then grill
 
@@ -36,7 +36,7 @@ Start from what the user wrote. Extract what is already exact; ask only about wh
 What must be pinned down (skip an item only when it is already unambiguous):
 
 1. **The claim.** One sentence: "when the user does <action> in <situation>, <observable result>". Which FR-, BR-, NFR-, UF-, BP- id does it prove? If the user gives only a topic ("test the diary"), ask for the exact behavior
-2. **Why integration.** Compare with the existing tests and `ARCHITECTURE.md` §Testing. If the behavior is already covered, say so and ask whether to extend that test, add a case anyway, or stop. If it needs no real app, navigation, Drift database or platform channel, ask whether a unit or widget test (`apps/mobile/test/`) is the better place
+2. **Why integration.** Compare with the existing tests and `CODE_QUALITY.md` (Tests). If the behavior is already covered, say so and ask whether to extend that test, add a case anyway, or stop. If it needs no real app, navigation, Drift database or platform channel, ask whether a unit or widget test (`apps/mobile/test/`) is the better place
 3. **Surface and state.** Signed in with which fake user, locale (EN or PL, set explicitly), theme, device orientation (portrait only, PRD §16), network (online, offline, flaky), permissions (camera, notifications) granted or denied. Which platform: Android emulator, iOS simulator, or a physical device
 4. **Setup.** Data that must exist (goals, products, entries, favorites, recents, reminders), created through the app's own repositories or a test seed into a fresh temporary Drift database, and what the fake API and fake OFF return. Defaults come from the helpers; confirm only what the claim depends on
 5. **Steps.** The user-visible actions in order: taps, text entry, scan result delivered by the fake scanner, navigation, a date change, going offline and back. Name the control as the user sees it
@@ -106,7 +106,7 @@ Work only in `<work>`. Edit only `apps/mobile/integration_test/` files and docs 
 - One new helper only if two places need it; it goes in `integration_test/support/`, typed, with a one-line comment. Otherwise keep the code in the test. No `dynamic`, no unchecked casts
 - Comments explain why, citing the BR-/FR-/NFR-/UF-/BP- or decision id; no narration of what the line does
 
-**Keep docs true**, in the same change: if `ARCHITECTURE.md` (Layout, §Testing, a decision row) or a README now says something false about the integration tests, fix that line. List doc edits separately in the summary.
+**Keep docs true**, in the same change: if `ARCHITECTURE.md` (Layout, a decision row), `CODE_QUALITY.md` (Tests) or a README now says something false about the integration tests, fix that line. List doc edits separately in the summary.
 
 ### Phase 5: Verify what the user selected
 
