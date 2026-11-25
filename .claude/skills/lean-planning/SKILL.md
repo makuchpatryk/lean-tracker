@@ -34,7 +34,7 @@ Run two full, independent tracks in parallel — same message, single response b
 1. Use Explore agent (medium breadth) to understand:
    - What exists today in `apps/mobile/`, `apps/api/`, `contracts/openapi/`, `db/migrations/`, `.github/workflows/`
    - Relevant existing code patterns (a similar use case, repository, handler, screen, view model, Drift table, migration, test)
-   - `pubspec.yaml`, `analysis_options.yaml`, `go.mod`, `.go-arch-lint.yml`, the Makefile
+   - `pubspec.yaml`, `analysis_options.yaml`, `go.mod`, the Makefile
    - Existing similar implementations (to avoid reinventing)
    Focus on: "What exists today that's related to this task?" (The repo may have little or no code yet; say so rather than inventing structure.)
 2. Write your own draft plan (see Phase 3 template) from these findings.
@@ -111,7 +111,7 @@ Example:
 ## Checkpoints (Todo List)
 Checkbox list of milestones, so progress is trackable and the plan can be resumed mid-way. Each checkpoint is a verifiable gate, not a restated step:
 - Group related Implementation Steps (reference them by number)
-- State the evidence that closes it, using only light checks: `make lint` clean, `make arch` clean, `make test` (or the named test files) green. Never name integration tests, builds on a device or manual timing as checkpoint evidence: integration tests are `lean-e2e` only, builds and drift checks belong to `lean-review`
+- State the evidence that closes it, using only light checks: `make lint` clean, `make test` (or the named test files) green. Never name integration tests, builds on a device or manual timing as checkpoint evidence: integration tests are `lean-e2e` only, builds and drift checks belong to `lean-review`
 - Order so each checkpoint leaves the workspace analyzing and light tests passing
 - 3-7 checkpoints; the last one covers docs + final verification
 
@@ -119,8 +119,8 @@ Example:
 ```
 - [ ] CP1 — Domain: steps 1-2; `flutter test test/diary/domain` green
 - [ ] CP2 — Contract and schema: steps 3-4; `make gen` runs, migration applies to a local Postgres
-- [ ] CP3 — Use case and storage: step 5; `make lint` and `make arch` clean, unit tests green
-- [ ] CP4 — Docs + final light verification: step 6; lint, arch and all unit tests green
+- [ ] CP3 — Use case and storage: step 5; `make lint` clean, unit tests green
+- [ ] CP4 — Docs + final light verification: step 6; lint and all unit tests green
 ```
 
 ### Risks & Mitigations
@@ -138,12 +138,12 @@ How do we verify this works?
 - Integration tests (Flutter `integration_test/`), heavy: [flows of §11, NFR-002 timing]. Do not plan integration test steps: implementation neither writes nor runs them. If a flow deserves one, list it under a "For `/lean-e2e`" note (the behavior in one sentence)
 - Manual testing: [scenarios, e.g. airplane mode add and sync, two devices editing one entry, Polish locale, dark theme, 200% font, camera permission denied]
 
-Split the strategy in two groups: **light** (`make lint`, `make arch`, `make test`: run during implementation, whichever the user selects) and **heavy** (builds, contract drift, manual timing: only by `lean-review` when the user selects them; integration tests: the `lean-e2e` skill only).
+Split the strategy in two groups: **light** (`make lint`, `make test`: run during implementation, whichever the user selects) and **heavy** (builds, contract drift, manual timing: only by `lean-review` when the user selects them; integration tests: the `lean-e2e` skill only).
 
 ## Success Checklist
 At launch, verify:
 - [ ] All success criteria met (with evidence)
-- [ ] Lint, architecture check and unit tests clean (implementation)
+- [ ] Lint and unit tests clean (implementation)
 - [ ] Heavy checks green when run (review): build, contract drift
 - [ ] Code review approved
 - [ ] Documentation updated (sections listed in "Fit with Project Docs")

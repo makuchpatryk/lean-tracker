@@ -74,7 +74,7 @@ Rules the code is written and reviewed against. Product: [PRD](PRD.md). Structur
 4. Does each unit have one responsibility, and does it depend on abstractions (SOLID)?
 5. Right module and layer? Dependency rule and module boundaries respected (ARCHITECTURE.md)?
 6. Input validated at the boundary, errors mapped at the edge, nothing sensitive logged?
-7. Tests for the logic; lint, architecture check and unit tests clean?
+7. Tests for the logic; lint and unit tests clean?
 
 ## Known debt
 

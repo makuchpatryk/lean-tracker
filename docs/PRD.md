@@ -513,9 +513,9 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 - **Requirement:** The system must support 50 users with up to 200 diary entries per user per month each within Supabase Free limits.
 - **Verification:** Manual check of Supabase usage dashboard.
 
-### NFR-008: Architecture boundaries
-- **Requirement:** 0 violations of the dependency rule and module-boundary rules from 18.1 in `main`; every business rule BR-xxx implemented in `domain` or `application` has a unit test that does not require network, database or Flutter widgets.
-- **Verification:** the architecture check in CI passes; unit tests run without external services.
+### NFR-008: Business rule tests
+- **Requirement:** every business rule BR-xxx implemented in `domain` or `application` has a unit test that does not require network, database or Flutter widgets.
+- **Verification:** unit tests run without external services.
 
 ## 18. Tech Stack
 | Layer | Choice | Version (if fixed) |
@@ -540,11 +540,12 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 - **Dependency rule:** `domain` must not import any other layer, any framework package or any other module's internals. `application` must depend only on `domain` and on interfaces (ports) defined in `domain` or `application`. `infrastructure` and `presentation`/`transport` must depend inward only. Business rules BR-xxx must be implemented in `domain` or `application`.
 - **Module boundaries:** a module must communicate with other modules only through its public interface (a single exported API per module: `lib/<module>/<module>.dart` in Flutter, the exported package API in Go; no imports of other modules' `internal` or `src` paths).
 - **Application boundaries:** `/apps/mobile`, `/apps/api` and the future `/apps/web` must not import each other's code. They must share only the OpenAPI contract in `/contracts/openapi`. Code shared between applications must not exist outside generated clients.
-- **Enforcement:** the rules above must be checked automatically in CI (Go: import restrictions through `go-arch-lint` or an equivalent tool; Flutter: import restrictions through a lint rule or an equivalent tool). A violation must fail the build.
 
 ### 18.2 Deployment & DevOps
+Everything in this section is built in M8 (D-61). Until then the system runs and is tested locally only.
+
 - **Environments:** exactly one environment, `test`: one Supabase project, one Cloud Run service for `/apps/api`. No production environment exists in the MVP.
-- **Pipeline on every push and pull request (GitHub Actions):** Go unit tests, Flutter unit tests, architecture checks (NFR-008), repository secret scan. A failure must block merging into `main`.
+- **Pipeline on every push and pull request (GitHub Actions):** Go unit tests, Flutter unit tests, repository secret scan. A failure must block merging into `main`.
 - **API deployment:** a manually triggered GitHub Actions workflow (`workflow_dispatch`) run on `main`. It must execute in this order: (1) run tests, (2) apply SQL migrations from `/db/migrations` to the `test` Supabase project, (3) build the Go container image, (4) push the image to a container registry, (5) deploy it to Cloud Run. If any step fails, the workflow must stop and must not execute later steps.
 - **Migrations:** forward-only SQL files, numbered in ascending order, applied by the pipeline with the Supabase CLI. A migration must not be edited after it has been applied.
 - **Secrets:** stored in GitHub Secrets and injected into Cloud Run as environment variables at deploy time. Required secrets: `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `DATABASE_URL`, `SUPABASE_JWKS_URL`. Secrets must not appear in the repository or in workflow logs.
@@ -555,9 +556,9 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 ## 19. Implementation Plan
 
 ### M1: Repo, database and API skeleton
-- **Includes:** monorepo setup with the structure and module skeletons from 18.1, architecture checks in CI (NFR-008), the manual API deploy workflow with migrations and secrets from 18.2, SQL migrations for all tables (section 13), Go service with JWT middleware, health endpoint, OpenAPI file, CI for tests, Cloud Run deploy.
+- **Includes:** monorepo setup with the structure and module skeletons from 18.1, SQL migrations for all tables (section 13) applied to a local Postgres, Go service with JWT middleware and health endpoint, OpenAPI file, local run with Docker Compose. M1 works locally only: CI, deployment, hosted migrations and secrets (18.2) are built in M8 (D-61).
 - **Depends on:** —
-- **Definition of done:** the architecture check fails the build when a test violation is introduced and passes on the clean skeleton; the API deploys to Cloud Run; a request without a valid JWT returns 401; migrations apply to an empty Supabase project; CI is green.
+- **Definition of done:** a request without a valid JWT returns 401; migrations apply to an empty local Postgres; the API runs locally.
 
 ### M2: Auth, onboarding, settings
 - **Includes:** FR-001, FR-002, FR-017, UF-001, UF-006 (goals, sign out).
@@ -590,9 +591,9 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 - **Definition of done:** acceptance criteria of FR-012, FR-016 pass.
 
 ### M8: Localization, accessibility, distribution
-- **Includes:** the manual mobile build and upload workflow from 18.2, FR-017, accessibility requirements (section 16), TestFlight and Google Play internal testing builds, NFR verification.
+- **Includes:** the whole of 18.2, built last (D-61): the CI pipeline on every push and pull request, the manual API deploy workflow with hosted migrations, secrets and Cloud Run deploy, and the manual mobile build and upload workflow; FR-017, accessibility requirements (section 16), TestFlight and Google Play internal testing builds, NFR verification.
 - **Depends on:** M7.
-- **Definition of done:** the app is installable by friends through internal testing channels; all NFRs verified.
+- **Definition of done:** CI is green and blocks merging on failure; the API deploys to Cloud Run and migrations apply to an empty Supabase project; the app is installable by friends through internal testing channels; all NFRs verified.
 
 # Appendix
 
@@ -649,7 +650,7 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 | D-48 | AI limit day and month in Europe/Warsaw | UTC; device time zone | User choice (deferred to post-MVP, see D-59) |
 | D-49 | Open Food Facts is not stored server-side; products are copied into entry snapshots | Server cache | Implementation detail derived from D-26 and offline requirement; not confirmed separately |
 | D-50 | Future desktop application is a web application (browser), planned post-MVP; the user declined changes to the AI model and distribution for now | Native desktop (Windows/macOS/Linux) | User choice |
-| D-51 | Monorepo with Clean Architecture, module-per-capability, strict application and module boundaries enforced in CI | Layered without enforcement | User requirement; the concrete layer names, module list, directory names and enforcement tools are derived from it and not confirmed separately |
+| D-51 | Monorepo with Clean Architecture, module-per-capability, strict application and module boundaries | Layered without strict boundaries | User requirement; the concrete layer names, module list and directory names are derived from it and not confirmed separately |
 | D-52 | One environment (`test`); no production in the MVP | Test + production | User choice |
 | D-53 | API deploy is a manual GitHub Actions workflow | Automatic on merge to main | User choice |
 | D-54 | Migrations are applied in the pipeline before the API deploy | Manual Supabase CLI | User choice |
@@ -659,6 +660,7 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 | D-58 | Container registry, rollback by image tag, forward-only migrations and the secret names in 18.2 | Other registries | Derived from D-53–D-57; not confirmed separately |
 | D-59 | AI meal-photo recognition and Firebase Analytics are removed from the MVP and recorded as future scope (section 23) | Keep in MVP | User choice; decisions D-10, D-24, D-34, D-43, D-45, D-48 and the KPI measurement method are deferred with them |
 | D-60 | UI follows `docs/DESIGN.html` (14 boards, light and dark palettes, Nunito) on top of Material 3 components | Plain Material 3 with a seed color | User choice; the design file was added after PRD v1.0. Bundling the Nunito font as an app asset and mapping the tokens to the Flutter `ColorScheme` are derived, not confirmed separately |
+| D-61 | CI, deployment, hosted migrations and secrets (18.2) are built last, in M8; M1–M7 run and are tested locally only | CI and deploy in M1 | User choice; everything works locally first, so nothing earlier needs the pipeline |
 
 ## 21. Open Questions
 None.

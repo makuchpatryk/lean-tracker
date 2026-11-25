@@ -127,7 +127,7 @@ The fix stage runs in a fresh context, so findings must live in the spec. This i
 
 ### Automated checks (background subagents, never in the main thread)
 
-**Ask which checks to run, every review.** Use `AskUserQuestion` (multi select) with the rows below that apply to what changed; mark the cheap ones (lint, architecture, unit tests) as recommended. Run exactly what the user selects, nothing more. "None" is valid: then say in the report that no checks ran.
+**Ask which checks to run, every review.** Use `AskUserQuestion` (multi select) with the rows below that apply to what changed; mark the cheap ones (lint, unit tests) as recommended. Run exactly what the user selects, nothing more. "None" is valid: then say in the report that no checks ran.
 
 **Integration tests are never offered, run or written here.** Flutter `integration_test/` belongs to the `lean-e2e` skill. If the user asks for them in a review, point to `/lean-e2e` and do not run them. Missing integration coverage for a changed flow may be a finding (suggest `/lean-e2e`), but this skill writes no test.
 
@@ -136,7 +136,6 @@ Run every selected checker in its own background subagent (Agent tool, `subagent
 | Checker | Command | Offer when |
 |---|---|---|
 | Lint | `make lint` | always |
-| Architecture | `make arch` | always |
 | Unit tests | `make test` (Go and Flutter) | always |
 | Contract drift | `make gen`, then `git -C <work> status --short` shows no change in generated files | `contracts/openapi`, `lib/gen/` or generated Go code changed |
 | Go build | `go build ./...` in `apps/api` (and `docker build` is not run) | `apps/api` changed |
@@ -147,7 +146,7 @@ The Migrations subagent may start a local database container and must stop and r
 
 Subagent prompt rules:
 - Run the one command only, from `<work>`'s root. Do NOT edit files, fix errors, or commit.
-- If a tool or target is missing (`flutter`, `go`, `docker`, `golangci-lint`, `go-arch-lint`, a Makefile target), report that instead of installing or creating it.
+- If a tool or target is missing (`flutter`, `go`, `docker`, `golangci-lint`, a Makefile target), report that instead of installing or creating it.
 - Report back in <=10 lines: PASS/FAIL, and for FAIL the exact error lines with `file:line`. No full logs.
 
 Main thread: keep going and do not poll or sleep. Results arrive as notifications; fold them into the final report. On FAIL, report it plainly with the errors. This skill never fixes.

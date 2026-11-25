@@ -51,9 +51,8 @@ The code is organised in rings. The inner rings hold what the app *is* (business
 - The only thing between them is the contract `contracts/openapi/openapi.yaml`. Clients are generated from it and never edited by hand.
 - **Contract first:** a change that crosses applications starts in the contract.
 
-### Enforced, not hoped for
+### Tested
 
-- Layer and module rules are checked by tools in CI; a violation fails the build (NFR-008).
 - Every business rule is unit-tested without network, database or UI framework.
 
 ## Layers
@@ -137,12 +136,6 @@ PRD 18.1 names nine capabilities. A module exists in an application only where t
 - **Errors:** inner layers return typed domain errors; only `transport` maps them to HTTP status and contract error codes; only the app maps codes to user text. No framework error crosses a layer outward (AD5).
 - **Local first:** the device writes through its own adapters first; `sync` moves changes later. Feature modules do not know if they are online (AD4).
 
-## Enforcement
-
-- Go: `go-arch-lint` (`apps/api/.go-arch-lint.yml`); Go `internal/` makes cross-module imports a compile error.
-- Dart: an import-restriction check for layers and modules (tool chosen in M1).
-- Both run in CI. A probe test introduces a violation and proves each check fails.
-
 ## Decisions
 
 | # | Decision |
@@ -157,5 +150,5 @@ PRD 18.1 names nine capabilities. A module exists in an application only where t
 ## Open items
 
 1. **M1** — Flutter state management and routing (proposal: `flutter_riverpod` providers declared in `app/`, `go_router`).
-2. **M1** — Dart import-restriction tool and OpenAPI generators.
+2. **M1** — OpenAPI generators.
 3. **M6** — shape of the `SyncSource` port and the sync contract.

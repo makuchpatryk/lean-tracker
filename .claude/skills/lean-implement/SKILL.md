@@ -43,7 +43,7 @@ Names: `<repo>` = main checkout root (`git rev-parse --show-toplevel`; from insi
 **0. Ask the user** with ONE `AskUserQuestion` call holding two questions:
 
 1. **Workspace** (single select): "Own git worktree `feature/<task-name>` (isolated, main checkout untouched)" or "Current branch `<branch>` (edit the main checkout directly)". Name the real current branch in the label. Skip this question only when the prompt that invoked you already carries the answer, when resuming and `<wt>` exists or the log has a `Decision: workspace` line (then state the mode you are continuing in), or when the directory is not a git repository
-2. **Checks** (multi select, none required): Lint (`make lint`), Architecture (`make arch`), Unit tests (`make test`: Go and Flutter). Offer exactly these; do NOT offer integration tests, builds or contract drift (see "Automated checks"). If the user types an Other answer naming integration tests, do not run them: point to `/lean-e2e`. Skip only when the invoking prompt already carries the answer. Ask again every run, even on resume (earlier choice may be the recommended default)
+2. **Checks** (multi select, none required): Lint (`make lint`), Unit tests (`make test`: Go and Flutter). Offer exactly these; do NOT offer integration tests, builds or contract drift (see "Automated checks"). If the user types an Other answer naming integration tests, do not run them: point to `/lean-e2e`. Skip only when the invoking prompt already carries the answer. Ask again every run, even on resume (earlier choice may be the recommended default)
 
 Record both answers in the spec's `## Implementation Log` (in `<work>`'s spec copy) as `- Decision: workspace: worktree|current-branch|in-place` and `- Decision: checks: <list or none>`. "None" is valid: then run no automated checks and say so in the final summary.
 
@@ -87,7 +87,7 @@ Do NOT ask for things the plan already specifies. Do NOT ask for subjective pref
 Before coding:
 0. **Read the docs first**, all three, as binding constraints:
    - `docs/PRD.md`: business rules (§5), processes (§6), user flows and exact UI strings (§11), functional requirements and acceptance criteria (§12), data model (§13), auth (§14), integrations (§15), platforms and UI (§16), NFRs (§17), stack and architecture (§18), decisions log (§20), future scope (§23, not built)
-   - `docs/ARCHITECTURE.md`: principles, layers, layout, modules, dependency rules, cross-layer flow, enforcement, decisions AD1+, open items
+   - `docs/ARCHITECTURE.md`: principles, layers, layout, modules, dependency rules, cross-layer flow, decisions AD1+, open items
    - `docs/CODE_QUALITY.md`: principles, single sources of truth, working agreements, review checklist
 
    Which app, module and layer each change belongs in, the rules the code must satisfy. For UI steps, take layout, colors and fonts from the DESIGN.html board the plan names (4 MB bundle: search it with a small script or ask the user for the values; do not Read it whole) and exact texts from PRD §11. If the plan conflicts with any of them, stop and ask (Phase 4) instead of silently picking a side.
@@ -111,7 +111,7 @@ Follow the plan's numbered steps exactly, one at a time, starting at the first u
 3. **Implement** — write code, create files, modify existing files
 4. **Match style** — follow project conventions (use existing code as template)
 5. **Use plan examples** — if plan provides code examples, adapt them; don't rewrite from scratch
-6. **Quick check** — in `<work>`, run only the checks the user selected in Phase 0b, scoped to what the step touched (`flutter test test/<path>`, `go test ./internal/<module>/...`, `make lint`, `make arch`, or the equivalent targets). Fast, in the foreground. Failing in code this step just wrote → fix it. Do not tick a step whose selected checks fail. If the user selected none, skip this. **Never run integration tests or other heavy checks here** (see "Automated checks" below)
+6. **Quick check** — in `<work>`, run only the checks the user selected in Phase 0b, scoped to what the step touched (`flutter test test/<path>`, `go test ./internal/<module>/...`, `make lint`, or the equivalent targets). Fast, in the foreground. Failing in code this step just wrote → fix it. Do not tick a step whose selected checks fail. If the user selected none, skip this. **Never run integration tests or other heavy checks here** (see "Automated checks" below)
 7. **Update the spec now**, before starting step N+1:
    - tick the step: `N. [ ]` → `N. [x]`
    - append to the log: `- Step N — done — files: <paths created/modified> — <one-line note: what was done, any deviation, any follow-up>`
@@ -202,19 +202,18 @@ A skill cannot clear this conversation and does not start the next stage. The us
 
 ### Automated checks (background subagents, never in the main thread)
 
-**Only what the user selected, light checks only.** Phase 0b asks which of lint, architecture and unit tests to run; run exactly those, nothing more. Implementation never runs or writes Flutter integration tests (that is the `lean-e2e` skill), and never runs builds, contract-drift checks, emulators, a hosted database or anything else that is slow or needs a device or the network (those belong to `lean-review`).
+**Only what the user selected, light checks only.** Phase 0b asks which of lint and unit tests to run; run exactly those, nothing more. Implementation never runs or writes Flutter integration tests (that is the `lean-e2e` skill), and never runs builds, contract-drift checks, emulators, a hosted database or anything else that is slow or needs a device or the network (those belong to `lean-review`).
 
 Run every checker in its own background subagent (Agent tool, `subagent_type: "general-purpose"`; subagents run in the background and notify on completion) so the main thread keeps working and the user is never blocked. Launch all in ONE message so they run in parallel. Targets come from the root `Makefile`; if a target does not exist yet, the subagent reports that instead of inventing one. Every command runs in `<work>`: give the subagent its absolute path (in worktree mode, not the main checkout's).
 
 | Checker | Command | Run when |
 |---|---|---|
 | Lint | `make lint` (dart format check, `flutter analyze`, `go vet`, `golangci-lint`) | user selected it |
-| Architecture | `make arch` (`go-arch-lint` and the Dart import check) | user selected it |
 | Unit tests | `make test` (`go test ./...`, `flutter test`) | user selected it |
 
 Subagent prompt rules:
 - Run the one command only, from `<work>`'s root. Do NOT edit files, fix errors, or commit.
-- If a tool or target is missing (`flutter`, `go`, `golangci-lint`, `go-arch-lint`, a Makefile target), report that instead of installing or creating it.
+- If a tool or target is missing (`flutter`, `go`, `golangci-lint`, a Makefile target), report that instead of installing or creating it.
 - Report back in <=10 lines: PASS/FAIL, and for FAIL the exact error lines with `file:line`. No full logs.
 
 Main thread: keep going (summary, docs, next step) and do not poll or sleep. Results arrive as notifications; fold them into the final message. On FAIL, report it plainly with the errors; fix only if the failure is in code this skill just wrote.
