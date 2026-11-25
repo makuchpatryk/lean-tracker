@@ -1,0 +1,108 @@
+# ---------------------------------------------------------------
+# Secrets (CLAUDE.md "Secrets"): only *.example files are tracked
+# ---------------------------------------------------------------
+.env
+.env.*
+!.env.example
+apps/api/.env
+apps/api/.env.*
+!apps/api/.env.example
+apps/mobile/env/*.json
+!apps/mobile/env/example.json
+*.pem
+*.key
+*.p12
+*.mobileprovision
+*.cer
+*.jks
+*.keystore
+key.properties
+android/key.properties
+android/local.properties
+ios/Runner/GoogleService-Info.plist
+google-services.json
+*service-account*.json
+*serviceAccount*.json
+
+# ---------------------------------------------------------------
+# Claude Code (local settings and task worktrees, CLAUDE.md skills)
+# ---------------------------------------------------------------
+.claude/worktrees/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# ---------------------------------------------------------------
+# Flutter / Dart (apps/mobile)
+# ---------------------------------------------------------------
+# pubspec.lock is committed on purpose (applications pin their deps)
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+.pub-cache/
+build/
+coverage/
+*.iml
+*.class
+*.log
+*.swp
+.DS_Store
+
+# Android
+apps/mobile/android/.gradle/
+apps/mobile/android/app/debug
+apps/mobile/android/app/profile
+apps/mobile/android/app/release
+apps/mobile/android/.kotlin/
+apps/mobile/android/captures/
+
+# iOS / macOS
+apps/mobile/ios/Pods/
+apps/mobile/ios/.symlinks/
+apps/mobile/ios/Flutter/Generated.xcconfig
+apps/mobile/ios/Flutter/flutter_export_environment.sh
+apps/mobile/ios/Flutter/ephemeral/
+apps/mobile/ios/ServiceDefinitions.json
+apps/mobile/ios/Runner/GeneratedPluginRegistrant.*
+apps/mobile/macos/Flutter/ephemeral/
+apps/mobile/macos/Pods/
+apps/mobile/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# ---------------------------------------------------------------
+# Go (apps/api)
+# ---------------------------------------------------------------
+apps/api/bin/
+apps/api/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+*.cover
+apps/api/vendor/
+go.work
+go.work.sum
+
+# ---------------------------------------------------------------
+# Local database and container state
+# ---------------------------------------------------------------
+supabase/.branches/
+supabase/.temp/
+.supabase/
+*.sqlite
+*.sqlite-journal
+*.db
+postgres-data/
+
+# ---------------------------------------------------------------
+# IDE and tool folders
+# ---------------------------------------------------------------
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+.screencaster/
