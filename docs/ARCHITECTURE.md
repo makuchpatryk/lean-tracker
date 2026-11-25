@@ -1,6 +1,6 @@
 # Lean Tracker — Architecture
 
-**Based on:** [PRD v1.0](PRD.md) | **Code rules:** [CODE_QUALITY.md](CODE_QUALITY.md) | **Status:** no code yet; M1 (repo, database and API skeleton) is next. Items marked _proposed_ are derived from the PRD, not stated in it, and are confirmed when their milestone is planned (see Open items).
+**Based on:** [PRD v1.0](PRD.md) | **Code rules:** [CODE_QUALITY.md](CODE_QUALITY.md) | **Design:** [DESIGN.html](DESIGN.html) (bundled canvas; open it in a browser) | **Status:** no code yet; M1 (repo, database and API skeleton) is next. Items marked _proposed_ are derived from the PRD, not stated in it, and are confirmed when their milestone is planned (see Open items).
 
 ## Drivers
 
@@ -23,7 +23,7 @@ apps/mobile/            Flutter app
   lib/main.dart         entry; calls app/ only
   lib/app/              composition root: wires modules (DI), router, AppDatabase (Drift, AD5), sync registration, error mapping. Imports every module's public file; nothing imports app/
   lib/kernel/           framework-free primitives used by every layer: Result, Clock port, Uuid port, LocalDate, limits.dart (rule values). No Flutter, no Drift, no http
-  lib/ui/               Material 3 theme (light/dark by system), shared widgets, l10n (app_en.arb, app_pl.arb, generated AppLocalizations), error code → message mapping. Imported by presentation layers and app/ only
+  lib/ui/               Material 3 theme built from the DESIGN.html tokens (light/dark by system, Nunito bundled as a font asset, AD12), shared widgets, l10n (app_en.arb, app_pl.arb, generated AppLocalizations), error code → message mapping. Imported by presentation layers and app/ only
   lib/gen/              generated Dart client of contracts/openapi (never edited by hand)
   lib/<module>/<module>.dart   the module's one public file (exports only what other modules or app/ need)
   lib/<module>/domain/         entities, value objects, rules (BR-xxx), ports (abstract repositories/services)
@@ -150,6 +150,7 @@ Exactly one environment, `test`: one Supabase project and one Cloud Run service 
 | AD9 | The server bounds client `updated_at` into the future so last-write-wins cannot be won forever by a bad clock |
 | AD10 | The API error body is a closed `ErrorCode` enum in the OpenAPI file; texts belong to the app |
 | AD11 | Local-only checks run through a root `Makefile`; skills report a missing target instead of inventing one |
+| AD12 | Design tokens are copied once from `docs/DESIGN.html` into `lib/ui/` (palettes, meal colors) and the Nunito font is bundled as an asset, so the app makes no font request at runtime |
 
 ## Open items (decide when the milestone is planned)
 

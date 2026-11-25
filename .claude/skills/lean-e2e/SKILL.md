@@ -25,7 +25,7 @@ Read, from `<repo>`:
 1. `apps/mobile/pubspec.yaml` (`integration_test` and `flutter_test` dev dependencies), `apps/mobile/analysis_options.yaml`, the root `Makefile`
 2. `apps/mobile/integration_test/`: the existing tests and any `support/` helpers (app launcher with test overrides, fake API client, fake OFF/barcode source, fake clock, in-memory or temporary Drift database, sign-in bypass, pump helpers). Know what exists before proposing anything new. Find the closest test and use it as the style template
 3. `apps/mobile/lib/app/`: where dependencies are wired, so the test replaces the network, the clock, the scanner and the notifications with fakes through the composition root, never by editing product code
-4. `docs/ARCHITECTURE.md` §Testing and decisions, and `docs/CODE_QUALITY.md`. `docs/PRD.md` only for the requirement ids the user names, and PRD §11 for exact UI strings
+4. `docs/ARCHITECTURE.md` §Testing and decisions, and `docs/CODE_QUALITY.md`. `docs/PRD.md` only for the requirement ids the user names, and PRD §11 for exact UI strings (`docs/DESIGN.html` is a 4 MB bundle: do not Read it whole)
 
 ### Phase 1: Take the request, then grill
 

@@ -90,7 +90,7 @@ Before coding:
    - `docs/ARCHITECTURE.md`: layout, dependency rules, invariants, errors, testing, deployment, decisions AD1+, open items
    - `docs/CODE_QUALITY.md`: principles, single sources of truth, working agreements, review checklist
 
-   Which app, module and layer each change belongs in, the rules the code must satisfy. If the plan conflicts with any of them, stop and ask (Phase 4) instead of silently picking a side.
+   Which app, module and layer each change belongs in, the rules the code must satisfy. For UI steps, take layout, colors and fonts from the DESIGN.html board the plan names (4 MB bundle: search it with a small script or ask the user for the values; do not Read it whole) and exact texts from PRD §11. If the plan conflicts with any of them, stop and ask (Phase 4) instead of silently picking a side.
 1. **Explore existing code**: Read relevant folders to understand current structure, patterns, imports. If the area has no code yet, follow ARCHITECTURE.md §Layout (and PRD §18).
 2. **Match style**: Examine existing code for:
    - Naming and exported API (few exports, typed; the module's public file exports only what others need)
@@ -147,6 +147,7 @@ When the last step of a checkpoint is done, update the plan's todo list in `spec
 - **Constants**: rule values live in `kernel/limits` (mirrored in both apps and held equal to the OpenAPI file by a test), not inline
 - **Migrations**: a new schema change is a new numbered file in `db/migrations/` (RLS on, no policies for `anon`/`authenticated`, grants for the API role); never edit a migration that may already be applied. Drift schema changes bump the Drift schema version and add a migration step
 - **Secrets**: only via env or `--dart-define-from-file`; never hardcoded, logged or written to tracked files; only `*.example` files (no real values) are tracked; the app holds only the Supabase anon key and URL
+- **Design**: colors, meal colors and the Nunito font come from the `lib/ui/` tokens copied from DESIGN.html; no color or font literal in widgets
 - **i18n and a11y**: every user-facing string is an ARB key (EN + PL) with the exact text of PRD §11; `Semantics` on interactive elements; 360 dp minimum width, font scale up to 200%, light and dark from the system theme
 - **Be literal**: If plan says "add field `is_shared` to products", add exactly that column, schema field and type, not a second name for it
 - **Complete steps**: Each step should be independently functional if possible; don't create stubs

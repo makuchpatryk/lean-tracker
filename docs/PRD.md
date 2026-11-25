@@ -489,7 +489,7 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 - **Responsiveness:** phone screens from 360 dp width; tablets and landscape are not supported.
 - **Languages:** Polish and English, selected by system locale.
 - **Accessibility:** scaling with system font size up to 200%; Semantics labels on all interactive elements; text contrast ratio at least 4.5:1.
-- **Design reference:** Material 3; light and dark theme following the system; no custom design system.
+- **Design reference:** `docs/DESIGN.html` (bundled canvas, open it in a browser): 14 phone boards of 390 × 844 (Logowanie, Cele (pierwsze uruchomienie), Dziennik, Dodaj wpis, Skaner, Ilość, Własny produkt, Szczegóły posiłku, Kopiuj posiłek, Tydzień, Ustawienia, Usuwanie konta; Dziennik and Ilość also in dark). Screen layout, colors (light and dark palettes), the meal accent colors and the Nunito font come from it. Components are Material 3 themed with those tokens; light and dark theme follow the system; no other custom design system. Where the design and §11 differ in a text, §11 wins; where they differ in layout, the design wins.
 
 ## 17. Non-Functional Requirements
 
@@ -658,6 +658,7 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 | D-57 | Mobile builds and uploads through a GitHub Actions workflow | Manual local builds | User choice |
 | D-58 | Container registry, rollback by image tag, forward-only migrations and the secret names in 18.2 | Other registries | Derived from D-53–D-57; not confirmed separately |
 | D-59 | AI meal-photo recognition and Firebase Analytics are removed from the MVP and recorded as future scope (section 23) | Keep in MVP | User choice; decisions D-10, D-24, D-34, D-43, D-45, D-48 and the KPI measurement method are deferred with them |
+| D-60 | UI follows `docs/DESIGN.html` (14 boards, light and dark palettes, Nunito) on top of Material 3 components | Plain Material 3 with a seed color | User choice; the design file was added after PRD v1.0. Bundling the Nunito font as an app asset and mapping the tokens to the Flutter `ColorScheme` are derived, not confirmed separately |
 
 ## 21. Open Questions
 None.

@@ -19,7 +19,7 @@ Before exploring code or writing any plan, interview user relentlessly until you
 - **Constraints**: data isolation (BR-001), offline matrix (BR-014), snapshot rule (BR-007), validation ranges (BR-003), local save ≤ 300 ms (NFR-002), barcode lookup p95 ≤ 4 s (NFR-001), security (NFR-004: HTTPS, JWT on every endpoint but health, secrets only where allowed), free tiers (Supabase Free, Cloud Run, NFR-007), a11y and 360 dp (§16), PL + EN strings (FR-017), scope limits (§10.3) and future scope (§23: not built in the MVP)?
 - **Unknowns**: Tricky parts (the sync protocol and conflict rule; client `updated_at` trust; idempotent upserts of client UUIDs; Drift migrations; scanner and notification permissions on Android 10+/iOS 16+; Apple sign-in on Android; OFF mapping and timeouts; day boundary in the device time zone; deleting the Supabase Auth user)? Where is the user uncertain?
 - **Priority**: What's most important? Any hard constraints vs nice-to-haves?
-- **Context**: Which milestone (M1–M8 in PRD §19)? Which user flow (UF-001–UF-006) and exact strings from PRD §11? Open items in ARCHITECTURE.md, known debt in CODE_QUALITY.md, prior attempts?
+- **Context**: Which milestone (M1–M8 in PRD §19)? Which user flow (UF-001–UF-006), which DESIGN.html board (Logowanie, Cele, Dziennik, Dodaj wpis, Skaner, Ilość, Własny produkt, Szczegóły posiłku, Kopiuj posiłek, Tydzień, Ustawienia, Usuwanie konta) and exact strings from PRD §11? Open items in ARCHITECTURE.md, known debt in CODE_QUALITY.md, prior attempts?
 - **Technical constraints**: Which app and module (`apps/mobile/lib/<module>/<layer>`, `apps/api/internal/<module>/internal/<layer>`)? New or changed route in `contracts/openapi` and a new error code? New SQL migration in `db/migrations/` and a matching Drift table or schema version? New rule value for `kernel/limits` (both apps) and the OpenAPI schema? New ARB keys (EN + PL)? New dependency (needs the owner's approval when not in PRD §18)? Existing patterns to follow?
 
 Don't assume—**ask until you're certain**. If user gives vague answers, drill deeper. Ask follow-ups, propose scenarios, stress-test assumptions. This usually takes 5-10 questions. Stop only when you understand the problem deeply enough to spot risks and trade-offs.
@@ -30,6 +30,7 @@ Run two full, independent tracks in parallel — same message, single response b
 
 **Track A (you, main agent):**
 0. Read before exploring: `docs/PRD.md` (business rules §5, processes §6, scope §10, user flows §11, functional requirements §12, data model §13, auth §14, integrations §15, platforms and UI §16, NFRs §17, stack, architecture and DevOps §18, milestones §19, decisions log §20, future scope §23), `docs/ARCHITECTURE.md` (drivers, layout, dependency rules, invariants, errors, testing, deployment, decisions AD1+, open items) and `docs/CODE_QUALITY.md` (principles, single sources of truth, working agreements, review checklist). The plan must fit all three; where it can't, the deviation is stated explicitly in the plan.
+   For UI work, name the DESIGN.html board the plan follows. `docs/DESIGN.html` is a 4 MB bundle: never Read it whole; search it with a small script or ask the user for values.
 1. Use Explore agent (medium breadth) to understand:
    - What exists today in `apps/mobile/`, `apps/api/`, `contracts/openapi/`, `db/migrations/`, `.github/workflows/`
    - Relevant existing code patterns (a similar use case, repository, handler, screen, view model, Drift table, migration, test)
@@ -38,7 +39,7 @@ Run two full, independent tracks in parallel — same message, single response b
    Focus on: "What exists today that's related to this task?" (The repo may have little or no code yet; say so rather than inventing structure.)
 2. Write your own draft plan (see Phase 3 template) from these findings.
 
-**Track B (independent Haiku agent):** Spawn via Agent tool with `model: "haiku"`, `subagent_type: "general-purpose"` (fresh agent, not a fork — it must not see your exploration or draft plan, or its "independent opinion" is worthless). In the prompt, give it verbatim the grilled requirements from Phase 1 and instruct it to, on its own: read `docs/PRD.md`, `docs/ARCHITECTURE.md` and `docs/CODE_QUALITY.md`, explore the codebase itself, then write a complete draft plan using the Phase 3 template. It must not talk to the user — it works from the requirements you hand it only.
+**Track B (independent Haiku agent):** Spawn via Agent tool with `model: "haiku"`, `subagent_type: "general-purpose"` (fresh agent, not a fork — it must not see your exploration or draft plan, or its "independent opinion" is worthless). In the prompt, give it verbatim the grilled requirements from Phase 1 and instruct it to, on its own: read `docs/PRD.md`, `docs/ARCHITECTURE.md` and `docs/CODE_QUALITY.md`, explore the codebase itself, then write a complete draft plan using the Phase 3 template. It must not talk to the user — it works from the requirements you hand it only. It must not open `docs/DESIGN.html` with Read (4 MB bundle); it uses the PRD's description of the design instead.
 
 Do not let either track see the other's output while in progress. Wait for both to finish before Phase 4.
 
@@ -76,7 +77,7 @@ Describe how the solution works end-to-end (screen → view model → use case �
 - **Contract**: New or changed routes in `contracts/openapi/openapi.yaml` (method, path, schemas, status codes, error codes), and the regenerated Dart client (`make gen`).
 - **Data model**: SQL migration file (next number in `db/migrations/`, forward-only), RLS and grants for a new table, the Drift table and schema version, the sync fields (`id`, `updated_at`, `deleted_at`).
 - **Limits**: new values in `kernel/limits` of both apps and the OpenAPI schema, with the contract test.
-- **UI**: screens, states (loading, empty, error, offline), exact PRD §11 texts as ARB keys (EN + PL), `Semantics` labels, 360 dp, font scale, light and dark.
+- **UI**: screens and the DESIGN.html board each follows, states (loading, empty, error, offline), exact PRD §11 texts as ARB keys (EN + PL), `Semantics` labels, 360 dp, font scale, light and dark.
 - **Dependencies**: New packages (justify against CODE_QUALITY; owner approval if not in PRD §18; platform permissions in `AndroidManifest.xml` / `Info.plist`), config or workflow changes.
 
 ### Fit with Project Docs

@@ -31,7 +31,7 @@ Determine what to review:
    Never create, switch or remove branches or worktrees, and never edit code or docs (the one allowed write is the `## Review` section of the spec, Phase 5). Run every git command as `git -C <work>` and read files under `<work>`, including `docs/` and the spec copy `<work>/specs/<task-name>.md` (in worktree mode the main checkout's spec copy is not ticked). Scope is `<work>`'s uncommitted changes (in current-branch mode ignore files that were already modified before the task if the prompt lists them), the PR diff when the user names a PR, or the files the prompt names
 1. **Check git status**: In the worktree, are there staged files? Modified files? Untracked files? If the directory is not a git repo, ask which files to review
 2. **Ask if needed**: "Should I review staged changes, all modified files, or specific files you mention?"
-3. **Read the docs**: `docs/PRD.md` (business rules §5, processes §6, user flows and UI strings §11, FRs and acceptance criteria §12, data model §13, auth §14, integrations §15, platforms and UI §16, NFRs §17, stack and architecture §18, decisions §20, future scope §23), `docs/ARCHITECTURE.md` (layout, dependency rules, invariants, errors, testing weights, deployment, decisions, open items) and `docs/CODE_QUALITY.md` (principles, single sources of truth, working agreements, review checklist, known debt). This defines what "correct" means for this project; the review is measured against them
+3. **Read the docs**: `docs/PRD.md` (business rules §5, processes §6, user flows and UI strings §11, FRs and acceptance criteria §12, data model §13, auth §14, integrations §15, platforms and UI §16, NFRs §17, stack and architecture §18, decisions §20, future scope §23), `docs/ARCHITECTURE.md` (layout, dependency rules, invariants, errors, testing weights, deployment, decisions, open items) and `docs/CODE_QUALITY.md` (principles, single sources of truth, working agreements, review checklist, known debt). This defines what "correct" means for this project; the review is measured against them. For UI changes, compare against the DESIGN.html board the spec names (4 MB bundle: search it, do not Read it whole)
 4. **Explore project**: Read existing code to understand patterns, conventions, neighbouring files
 5. **Set context**: Note which area(s) the change touches (`apps/mobile/lib/<module>/<layer>`, `apps/api/internal/<module>/internal/<layer>`, `contracts/openapi`, `db/migrations`, workflows, config)
 
@@ -55,7 +55,7 @@ For each file in scope:
    - **Auth and account (§14, FR-001, FR-016, BR-017)**: JWKS signature, `exp`, `aud` on every endpoint but health; `sub` as user id; refresh token in secure storage; deletion removes rows and the Auth user, re-auth first, local database cleared; service role key only in `account/infrastructure`
    - **Reminders (BR-016, FR-012)**: 0–3, local only, fixed text in PL/EN, permission-denied message with settings link
    - **Limits**: rule values in `kernel/limits` and the OpenAPI schemas, not inline magic numbers
-   - **UI (§16, FR-017, UF-001–UF-006)**: strings via ARB with the exact PRD texts (EN + PL), `Semantics` on interactive elements, 360 dp, font scale 200%, contrast, light and dark from the system, empty, error and offline states
+   - **UI (§16, FR-017, UF-001–UF-006)**: layout and tokens match the DESIGN.html board, no color or font literal outside `lib/ui/`, strings via ARB with the exact PRD texts (EN + PL), `Semantics` on interactive elements, 360 dp, font scale 200%, contrast, light and dark from the system, empty, error and offline states
    - Does the change touch anything the docs describe (PRD rules, FRs, data model, stack; ARCHITECTURE layout, invariants, decisions, open items; CODE_QUALITY single sources, known debt) without updating them? Does it contradict a row of the PRD decisions log (§20) or ARCHITECTURE decisions?
 5. **Categorize findings**: Critical, Warning, Suggestion, Nitpick
 
@@ -164,6 +164,7 @@ Main thread: keep going and do not poll or sleep. Results arrive as notification
 - Lockfiles (`pubspec.lock`, `go.sum`), `build/`, `.dart_tool/`, `.gradle/`, `Pods/`, `*.g.dart`, `*.freezed.dart`, `lib/gen/`, generated Go code (review the OpenAPI file that produces them instead)
 - Generated l10n output (review the ARB files)
 - Anything outside the repo
+- `docs/DESIGN.html` (reference material), unless the user asks
 
 ## What Good Looks Like
 

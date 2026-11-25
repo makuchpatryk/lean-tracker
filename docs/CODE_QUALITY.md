@@ -1,6 +1,6 @@
 # Code quality
 
-Rules Lean Tracker is written and reviewed against. **KISS and YAGNI first** (one author, about 50 friends, 0 revenue, free tiers). Product: [PRD](./PRD.md). Structure: [ARCHITECTURE.md](./ARCHITECTURE.md).
+Rules Lean Tracker is written and reviewed against. **KISS and YAGNI first** (one author, about 50 friends, 0 revenue, free tiers). Product: [PRD](./PRD.md). Structure: [ARCHITECTURE.md](./ARCHITECTURE.md). Design: [DESIGN.html](./DESIGN.html).
 
 ## Principles
 
@@ -28,7 +28,7 @@ Rules Lean Tracker is written and reviewed against. **KISS and YAGNI first** (on
 | JWT verification and `user_id` extraction | `apps/api/internal/platform/` (verifier) and `auth` module middleware; modules read `userID` from the request context only through `auth`'s public package |
 | Error codes and their texts | codes: `contracts/openapi` (`ErrorCode`); texts: `apps/mobile/lib/ui/` mapping to ARB keys |
 | UI text (PL and EN) | `apps/mobile/lib/l10n/app_en.arb`, `app_pl.arb` (exact strings of PRD §11) |
-| Theme, spacing and shared widgets | `apps/mobile/lib/ui/` (Material 3 color scheme from a seed, light and dark by system) |
+| Design tokens (light and dark palettes, meal colors, Nunito) | `apps/mobile/lib/ui/` (`ColorScheme` and theme extensions copied once from `docs/DESIGN.html`; no color or font literal in widgets) |
 | Schema and indexes | `db/migrations/` (server), `apps/mobile/lib/<module>/infrastructure/` Drift tables and `apps/mobile/drift_schemas/` (device) |
 | Configuration names and secrets | API: `apps/api/internal/platform/config` (validation), `apps/api/.env.example`, the deploy workflow's secret names, kept equal by a test; app: `apps/mobile/env/example.json` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `API_BASE_URL`) |
 | Commit message rule | CLAUDE.md "Commits" |
@@ -44,7 +44,7 @@ Rules Lean Tracker is written and reviewed against. **KISS and YAGNI first** (on
 - **Persistence**: only the tables of PRD §13 on the server and their Drift mirror on the device; the app stores the session in secure storage and nothing else outside Drift. No analytics identifiers, no extra files with personal data.
 - **Cleanup**: streams, subscriptions, controllers, camera and timers disposed with the widget or scope; Go goroutines stop with their context; HTTP bodies closed.
 - **Privacy and safety**: never log passwords, JWTs, refresh tokens, email addresses, diary contents or secrets; log a request id and a status, not payloads. The device local database holds personal diary data: it is cleared on sign-out and on account deletion.
-- **UI**: no literal user-facing text in widgets (ARB keys, PL and EN); every interactive element has a `Semantics` label; layouts work from 360 dp wide, in portrait, with system font scaling up to 200%; text contrast at least 4.5:1; light and dark theme from the system; Material 3 components, no custom design system.
+- **UI**: no literal user-facing text in widgets (ARB keys, PL and EN); every interactive element has a `Semantics` label; layouts work from 360 dp wide, in portrait, with system font scaling up to 200%; text contrast at least 4.5:1; light and dark theme from the system; Material 3 components themed with the DESIGN.html tokens, no other custom design system; screens follow the matching board.
 - **Flutter**: logic in `domain`/`application`, state in view models; widgets build from state and send intents, they never call the API client, Drift or a plugin directly; no `BuildContext` across async gaps without a mounted check; keep `build` free of side effects.
 - **Comments**: why, not what; cite the BR/FR/NFR id or decision number for a non-obvious rule.
 - **Tests**: one behavior per case, the name states the rule and cites the id (`BR-006: serving uses serving_size`); table-driven in Go, `group`/`test` in Dart; business-rule tests need no network, database or widget (NFR-008).
