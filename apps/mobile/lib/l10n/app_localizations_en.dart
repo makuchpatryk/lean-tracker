@@ -161,9 +161,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSettings => 'Settings';
 
   @override
-  String get diaryPlaceholder => 'Diary arrives in the next version.';
-
-  @override
   String get retry => 'Try again';
 
   @override
@@ -171,4 +168,151 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsEditGoals => 'Edit goals';
+
+  @override
+  String get diaryGreeting => 'Hi!';
+
+  @override
+  String get diaryKcalLeft => 'kcal left';
+
+  @override
+  String get diaryEaten => 'Eaten';
+
+  @override
+  String diaryOfGoal(String goal) {
+    return 'of $goal kcal';
+  }
+
+  @override
+  String get macroProtein => 'Protein';
+
+  @override
+  String get macroFat => 'Fat';
+
+  @override
+  String get macroCarbs => 'Carbs';
+
+  @override
+  String macroOfGoal(String value, String goal) {
+    return '$value / $goal g';
+  }
+
+  @override
+  String get mealBreakfast => 'Breakfast';
+
+  @override
+  String get mealLunch => 'Lunch';
+
+  @override
+  String get mealDinner => 'Dinner';
+
+  @override
+  String get mealSnack => 'Snacks';
+
+  @override
+  String mealSummary(String kcal, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '1 entry',
+    );
+    return '$kcal kcal · $_temp0';
+  }
+
+  @override
+  String get noEntries => 'No entries';
+
+  @override
+  String get mealKcalLabel => 'kcal in this meal';
+
+  @override
+  String entryLine(String quantity, String protein, String fat, String carbs) {
+    return '$quantity · P $protein · F $fat · C $carbs';
+  }
+
+  @override
+  String get addProduct => 'Add product';
+
+  @override
+  String addTo(String meal) {
+    return 'Add to: $meal';
+  }
+
+  @override
+  String get noProducts => 'No products yet';
+
+  @override
+  String per100(String kcal, String unit) {
+    return '$kcal kcal / 100 $unit';
+  }
+
+  @override
+  String servingInfo(String size, String unit) {
+    return 'serving $size $unit';
+  }
+
+  @override
+  String unitServingWithSize(String size, String unit) {
+    return 'serving ($size $unit)';
+  }
+
+  @override
+  String get unitMl => 'ml';
+
+  @override
+  String get quantityTitle => 'Quantity';
+
+  @override
+  String get quantityLabel => 'Quantity';
+
+  @override
+  String get mealLabel => 'Meal';
+
+  @override
+  String get dateLabel => 'Date';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get errorQuantityRange => 'Enter a quantity from 0.1 to 10000.';
+
+  @override
+  String get errorEntryNotSaved => 'Could not save entry.';
+
+  @override
+  String get deleteEntry => 'Delete entry';
+
+  @override
+  String get deleteEntryQuestion => 'Delete this entry?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get a11yPreviousDay => 'Previous day';
+
+  @override
+  String get a11yNextDay => 'Next day';
+
+  @override
+  String get a11yPickDate => 'Pick a date';
+
+  @override
+  String a11yAddToMeal(String meal) {
+    return 'Add entry to $meal';
+  }
+
+  @override
+  String get a11yDecrease => 'Decrease quantity';
+
+  @override
+  String get a11yIncrease => 'Increase quantity';
+
+  @override
+  String get a11yNegative => 'minus';
 }

@@ -48,7 +48,7 @@ Rules the code is written and reviewed against. Product: [PRD](PRD.md). Structur
 | Business rules | the owning module's `domain` (or `application`) |
 | UI text (PL, EN) | `apps/mobile/lib/l10n/*.arb` |
 | Theme and design tokens | `apps/mobile/lib/ui/` |
-| Database schema | `apps/api/db/migrations/` (server), Drift tables in `infrastructure/` (device) |
+| Database schema | `apps/api/db/migrations/` (server), Drift tables in each module's `infrastructure/`, composed in `app/database.dart` (device) |
 | Configuration names | the API config validation and `*.example` env files |
 | Tool versions | root `Makefile` image variables (`apps/api/Dockerfile` and `go.mod` follow them) |
 | Generated clients and server stubs | `make gen` from the contract |
@@ -80,4 +80,4 @@ Rules the code is written and reviewed against. Product: [PRD](PRD.md). Structur
 
 ## Known debt
 
-None.
+- Dev seed products in `apps/mobile/lib/diary/infrastructure/dev_seed_products.dart` (code that ships, behind `kDebugMode`). Removed in M4, when the products module replaces the `ProductSource` override.

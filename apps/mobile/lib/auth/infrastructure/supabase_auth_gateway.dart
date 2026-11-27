@@ -32,6 +32,9 @@ class SupabaseAuthGateway implements AuthGateway {
   @override
   AuthStatus get current => _current;
 
+  @override
+  String? get currentUserId => _auth.currentUser?.id;
+
   void dispose() {
     unawaited(_subscription.cancel());
     unawaited(_controller.close());

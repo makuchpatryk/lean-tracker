@@ -161,9 +161,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get navSettings => 'Ustawienia';
 
   @override
-  String get diaryPlaceholder => 'Dziennik pojawi się w kolejnej wersji.';
-
-  @override
   String get retry => 'Spróbuj ponownie';
 
   @override
@@ -171,4 +168,153 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get settingsEditGoals => 'Edytuj cele';
+
+  @override
+  String get diaryGreeting => 'Cześć!';
+
+  @override
+  String get diaryKcalLeft => 'kcal zostało';
+
+  @override
+  String get diaryEaten => 'Zjedzone';
+
+  @override
+  String diaryOfGoal(String goal) {
+    return 'z $goal kcal';
+  }
+
+  @override
+  String get macroProtein => 'Białko';
+
+  @override
+  String get macroFat => 'Tłuszcz';
+
+  @override
+  String get macroCarbs => 'Węgle';
+
+  @override
+  String macroOfGoal(String value, String goal) {
+    return '$value / $goal g';
+  }
+
+  @override
+  String get mealBreakfast => 'Śniadanie';
+
+  @override
+  String get mealLunch => 'Obiad';
+
+  @override
+  String get mealDinner => 'Kolacja';
+
+  @override
+  String get mealSnack => 'Przekąski';
+
+  @override
+  String mealSummary(String kcal, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count wpisu',
+      many: '$count wpisów',
+      few: '$count wpisy',
+      one: '1 wpis',
+    );
+    return '$kcal kcal · $_temp0';
+  }
+
+  @override
+  String get noEntries => 'Brak wpisów';
+
+  @override
+  String get mealKcalLabel => 'kcal w tym posiłku';
+
+  @override
+  String entryLine(String quantity, String protein, String fat, String carbs) {
+    return '$quantity · B $protein · T $fat · W $carbs';
+  }
+
+  @override
+  String get addProduct => 'Dodaj produkt';
+
+  @override
+  String addTo(String meal) {
+    return 'Dodaj do: $meal';
+  }
+
+  @override
+  String get noProducts => 'Brak produktów';
+
+  @override
+  String per100(String kcal, String unit) {
+    return '$kcal kcal / 100 $unit';
+  }
+
+  @override
+  String servingInfo(String size, String unit) {
+    return 'porcja $size $unit';
+  }
+
+  @override
+  String unitServingWithSize(String size, String unit) {
+    return 'porcja ($size $unit)';
+  }
+
+  @override
+  String get unitMl => 'ml';
+
+  @override
+  String get quantityTitle => 'Ilość';
+
+  @override
+  String get quantityLabel => 'Ilość';
+
+  @override
+  String get mealLabel => 'Posiłek';
+
+  @override
+  String get dateLabel => 'Data';
+
+  @override
+  String get save => 'Zapisz';
+
+  @override
+  String get errorQuantityRange => 'Podaj ilość od 0,1 do 10000.';
+
+  @override
+  String get errorEntryNotSaved => 'Nie udało się zapisać wpisu.';
+
+  @override
+  String get deleteEntry => 'Usuń wpis';
+
+  @override
+  String get deleteEntryQuestion => 'Usunąć ten wpis?';
+
+  @override
+  String get cancel => 'Anuluj';
+
+  @override
+  String get delete => 'Usuń';
+
+  @override
+  String get a11yPreviousDay => 'Poprzedni dzień';
+
+  @override
+  String get a11yNextDay => 'Następny dzień';
+
+  @override
+  String get a11yPickDate => 'Wybierz datę';
+
+  @override
+  String a11yAddToMeal(String meal) {
+    return 'Dodaj wpis do: $meal';
+  }
+
+  @override
+  String get a11yDecrease => 'Zmniejsz ilość';
+
+  @override
+  String get a11yIncrease => 'Zwiększ ilość';
+
+  @override
+  String get a11yNegative => 'minus';
 }

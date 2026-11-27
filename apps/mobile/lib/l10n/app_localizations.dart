@@ -392,12 +392,6 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get navSettings;
 
-  /// Temporary Diary body, removed in M3.
-  ///
-  /// In en, this message translates to:
-  /// **'Diary arrives in the next version.'**
-  String get diaryPlaceholder;
-
   /// Retry button.
   ///
   /// In en, this message translates to:
@@ -415,6 +409,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit goals'**
   String get settingsEditGoals;
+
+  /// Greeting at the top of the Diary.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi!'**
+  String get diaryGreeting;
+
+  /// Label under the remaining kcal on the Diary summary card.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal left'**
+  String get diaryKcalLeft;
+
+  /// Label of the consumed kcal on the Diary summary card.
+  ///
+  /// In en, this message translates to:
+  /// **'Eaten'**
+  String get diaryEaten;
+
+  /// Consumed kcal compared to the goal; {goal} is the formatted kcal goal.
+  ///
+  /// In en, this message translates to:
+  /// **'of {goal} kcal'**
+  String diaryOfGoal(String goal);
+
+  /// Protein label.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein'**
+  String get macroProtein;
+
+  /// Fat label.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat'**
+  String get macroFat;
+
+  /// Carbohydrates label.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbs'**
+  String get macroCarbs;
+
+  /// Consumed grams of a macro over its goal, both formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} / {goal} g'**
+  String macroOfGoal(String value, String goal);
+
+  /// Meal name (BR-005).
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast'**
+  String get mealBreakfast;
+
+  /// Meal name (BR-005).
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch'**
+  String get mealLunch;
+
+  /// Meal name (BR-005).
+  ///
+  /// In en, this message translates to:
+  /// **'Dinner'**
+  String get mealDinner;
+
+  /// Meal name (BR-005).
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks'**
+  String get mealSnack;
+
+  /// Meal card summary: formatted kcal and the number of entries.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal · {count, plural, one{1 entry} other{{count} entries}}'**
+  String mealSummary(String kcal, int count);
+
+  /// Shown for a meal without entries (PRD UF-002).
+  ///
+  /// In en, this message translates to:
+  /// **'No entries'**
+  String get noEntries;
+
+  /// Label under the kcal total on Meal details.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal in this meal'**
+  String get mealKcalLabel;
+
+  /// Entry line: formatted quantity with unit, then protein, fat and carbs in grams.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} · P {protein} · F {fat} · C {carbs}'**
+  String entryLine(String quantity, String protein, String fat, String carbs);
+
+  /// Button on Meal details that opens Add entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add product'**
+  String get addProduct;
+
+  /// Header of the Add entry screen; {meal} is the meal name.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to: {meal}'**
+  String addTo(String meal);
+
+  /// Shown on Add entry when there is no product source (M3 release builds).
+  ///
+  /// In en, this message translates to:
+  /// **'No products yet'**
+  String get noProducts;
+
+  /// Energy per 100 g or ml of a product.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal / 100 {unit}'**
+  String per100(String kcal, String unit);
+
+  /// Serving size of a product.
+  ///
+  /// In en, this message translates to:
+  /// **'serving {size} {unit}'**
+  String servingInfo(String size, String unit);
+
+  /// Serving unit chip with its size.
+  ///
+  /// In en, this message translates to:
+  /// **'serving ({size} {unit})'**
+  String unitServingWithSize(String size, String unit);
+
+  /// Unit: milliliter.
+  ///
+  /// In en, this message translates to:
+  /// **'ml'**
+  String get unitMl;
+
+  /// Title of the quantity form.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantityTitle;
+
+  /// Label of the quantity field.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantityLabel;
+
+  /// Label of the meal chips on the quantity form.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal'**
+  String get mealLabel;
+
+  /// Label of the date field on the quantity form.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get dateLabel;
+
+  /// Save button of the quantity form.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Shown under the quantity field when it is invalid (PRD UF-003, BR-003).
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a quantity from 0.1 to 10000.'**
+  String get errorQuantityRange;
+
+  /// SnackBar when an entry could not be stored (PRD UF-002).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save entry.'**
+  String get errorEntryNotSaved;
+
+  /// Button that deletes an entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry'**
+  String get deleteEntry;
+
+  /// Question of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this entry?'**
+  String get deleteEntryQuestion;
+
+  /// Cancel button of a dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Confirm button of the delete dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// Screen reader label of the previous-day arrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous day'**
+  String get a11yPreviousDay;
+
+  /// Screen reader label of the next-day arrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Next day'**
+  String get a11yNextDay;
+
+  /// Screen reader label of the calendar button.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get a11yPickDate;
+
+  /// Screen reader label of a meal's plus button.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry to {meal}'**
+  String a11yAddToMeal(String meal);
+
+  /// Screen reader label of the minus button.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease quantity'**
+  String get a11yDecrease;
+
+  /// Screen reader label of the plus button.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase quantity'**
+  String get a11yIncrease;
+
+  /// Spoken in place of the minus sign before a negative number.
+  ///
+  /// In en, this message translates to:
+  /// **'minus'**
+  String get a11yNegative;
 }
 
 class _AppLocalizationsDelegate

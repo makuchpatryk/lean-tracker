@@ -238,6 +238,7 @@
 4. User taps an entry to edit quantity, unit, meal, date, or delete it.
 - **Error states:** save failure locally → "Could not save entry."
 - **Empty states:** meal without entries shows "No entries" and the plus button.
+- **M3 scope:** the Diary has date arrows and a date picker (no 5-day strip), the summary card and four meal cards. Tapping a meal card opens its details (entries, "Add product"; copy meal arrives in M5). Tapping an entry opens the quantity form, where it can be changed or deleted after a confirmation. Entries are created from a debug-only seed product list until the products module (M4). All of it works offline.
 
 ### UF-003: Add entry
 1. User taps plus in a meal section; app opens add screen with tabs Search, Favorites, Recents and buttons Scan, Own product.
@@ -679,6 +680,7 @@ Everything in this section is built in M8 (D-61), except the lint and unit-test 
 | D-72 | Email confirmation is on, with a check-email screen; password reset ships in M2; the deep link is `io.github.example.leantracker://auth-callback`; Google and Apple sign-in use Supabase OAuth in the browser (no native SDKs); the auth flow is PKCE | Confirmation off; reset later; native `google_sign_in` and `sign_in_with_apple` (two more packages, more platform config) | User choice; fewer packages and one code path |
 | D-73 | In M2 the goals are stored only through the API (`GET` and `PUT /v1/settings`, one `Settings` schema without `updated_at`); there is no local cache until Drift arrives in M3; the error codes `VALIDATION_ERROR`, `SETTINGS_NOT_FOUND` and `INTERNAL_ERROR` are generic and reused by later routes | Local cache now (throwaway before Drift); route-specific codes; separate input and output schemas | User choice |
 | D-74 | The session is kept with `flutter_secure_storage` (PRD §14), `yaml` is a dev dependency for the AD6 limits test, and `API_BASE_URL` is a non-secret `--dart-define` next to `SUPABASE_URL` and `SUPABASE_ANON_KEY` | The `supabase_flutter` default (SharedPreferences) | Owner-approved 2026-11-27; §14 requires secure storage |
+| D-75 | M3 local data choices: the goals are cached in Drift per user and read when the API is unreachable, while goal edits stay online-only until sync (M6); one device database with `user_id` on every row and one repository per user scope; numbers stored as REAL; entries come from debug-only seed products behind a `ProductSource` port until M4; delete is a soft delete (`deleted_at`) after a confirmation dialog; `drift_flutter` is added to open the database (not in §18); the Diary has no 5-day strip and the quantity form no quick-amount chips | Goals through the API only (breaks BR-014); one database file per user; integer tenths for numbers; a manual product form in M3; a hard delete; `drift` with `path_provider` | User choice; owner-approved `drift_flutter` 2026-11-27 |
 
 ## 21. Open Questions
 None.

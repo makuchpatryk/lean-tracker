@@ -29,6 +29,9 @@ abstract interface class AuthGateway {
 
   AuthStatus get current;
 
+  /// The signed-in user's id, or null when signed out. Scopes the local data to one user (BR-001).
+  String? get currentUserId;
+
   /// The current access token (refreshed by the SDK), or null when signed out.
   Future<String?> accessToken();
 

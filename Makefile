@@ -39,7 +39,7 @@ test-go:
 	$(GO_RUN) $(GO_IMAGE) go test -count=1 ./...
 
 lint-dart:
-	$(FLUTTER_RUN) 'flutter pub get && dart format --output=none --set-exit-if-changed lib/main.dart lib/app lib/kernel lib/ui lib/auth lib/settings test && flutter analyze --fatal-infos $(FLUTTER_FIX)'
+	$(FLUTTER_RUN) 'flutter pub get && dart format --output=none --set-exit-if-changed lib/main.dart lib/app lib/kernel lib/ui lib/auth lib/settings lib/diary test && flutter analyze --fatal-infos $(FLUTTER_FIX)'
 
 test-dart:
 	$(FLUTTER_RUN) 'flutter test $(FLUTTER_FIX)'

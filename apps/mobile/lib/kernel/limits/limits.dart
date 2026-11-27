@@ -9,6 +9,12 @@ abstract final class Limits {
   static const int goalMacroMin = 0;
   static const int goalMacroMax = 1000;
 
+  /// Quantity of a diary entry, with at most one decimal (BR-003). App-side for now like
+  /// [passwordMinLength]: the contract has no diary schema until M6, when these become AD6-checked.
+  static const double quantityMin = 0.1;
+  static const double quantityMax = 10000;
+  static const int quantityDecimals = 1;
+
   /// Shortest password Supabase Auth accepts (FR-001, D-41). App-side only: it is an Auth setting, not
   /// part of the API contract.
   static const int passwordMinLength = 8;

@@ -14,6 +14,10 @@ abstract final class Routes {
   static const goals = '/goals';
   static const authCallback = '/auth-callback';
   static const diary = '/diary';
+  static const diaryMeal = '/diary/meal';
+  static const diaryAdd = '/diary/add';
+  static const diaryAddQuantity = '/diary/add/quantity';
+  static const diaryEntry = '/diary/entry';
   static const settings = '/settings';
   static const editGoals = '/settings/goals';
 }
