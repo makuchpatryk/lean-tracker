@@ -18,7 +18,7 @@ List<Override> appOverrides() => [
   authGatewayProvider.overrideWith((ref) {
     final gateway = SupabaseAuthGateway(
       Supabase.instance.client.auth,
-      callbackUrl: AppConfig.authCallbackUrl,
+      AppConfig.authCallbackUrl,
     );
     ref.onDispose(gateway.dispose);
     return gateway;

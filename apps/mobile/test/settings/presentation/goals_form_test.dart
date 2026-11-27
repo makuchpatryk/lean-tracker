@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lean_tracker/l10n/app_localizations.dart';
+import 'package:lean_tracker/settings/presentation/goals_form.dart';
 import 'package:lean_tracker/settings/settings.dart';
 import 'package:lean_tracker/ui/theme.dart';
 

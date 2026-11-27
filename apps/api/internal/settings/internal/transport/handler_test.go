@@ -46,12 +46,19 @@ func (r *fakeRepo) Upsert(_ context.Context, userID string, g domain.Goals, _ ti
 	return nil
 }
 
+// testAPI completes the generated server interface: the settings handler under test plus an unused health route.
+type testAPI struct{ *transport.Handler }
+
+func (testAPI) GetHealth(context.Context, openapi.GetHealthRequestObject) (openapi.GetHealthResponseObject, error) {
+	return openapi.GetHealth200JSONResponse{Status: openapi.HealthStatusOk}, nil
+}
+
 // newServer serves the generated strict handler. A request carrying the X-Test-User header gets that
 // user id in its context, as the JWT middleware would set it; one without the header gets none.
 func newServer(repo *fakeRepo) http.Handler {
 	h := transport.NewHandler(application.NewGetGoals(repo), application.NewSaveGoals(repo, fixedClock{}))
 	mux := http.NewServeMux()
-	openapi.HandlerWithOptions(openapi.NewStrictHandler(h, nil), openapi.StdHTTPServerOptions{BaseRouter: mux})
+	openapi.HandlerWithOptions(openapi.NewStrictHandler(testAPI{h}, nil), openapi.StdHTTPServerOptions{BaseRouter: mux})
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if user := r.Header.Get("X-Test-User"); user != "" {
 			r = r.WithContext(requestuser.WithUserID(r.Context(), user))

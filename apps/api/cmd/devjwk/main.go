@@ -47,6 +47,10 @@ func run(path string) error {
 	if err != nil {
 		return err
 	}
+	d, err := key.Bytes() // the private scalar, left-padded to 32 bytes
+	if err != nil {
+		return err
+	}
 	kid := make([]byte, 16)
 	if _, err := rand.Read(kid); err != nil {
 		return err
@@ -56,7 +60,7 @@ func run(path string) error {
 		Crv:    "P-256",
 		X:      b64(key.X.FillBytes(make([]byte, 32))),
 		Y:      b64(key.Y.FillBytes(make([]byte, 32))),
-		D:      b64(key.D.FillBytes(make([]byte, 32))),
+		D:      b64(d),
 		Kid:    hex.EncodeToString(kid),
 		Alg:    "ES256",
 		Use:    "sig",
@@ -65,7 +69,8 @@ func run(path string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	// 0755: the auth container runs as another user and must traverse the directory.
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil { //nolint:gosec // local dev key directory, see above
 		return err
 	}
 	// O_EXCL: never overwrite a key the running auth container already signs with. 0644 because the

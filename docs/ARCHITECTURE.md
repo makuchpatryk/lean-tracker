@@ -106,8 +106,7 @@ apps/api/                         Go application
   internal/kernel/                framework-free primitives (`requestuser`: user id in `context`; `clock`; `limits`)
   internal/gen/openapi/           generated server interface and models (never edited; `make gen-go`)
 Makefile                          Docker-run toolchain: gen, lint, test, local database
-compose.yaml                      local Postgres (`supabase/postgres`), local Supabase Auth (profile `auth`) and the API image (profile `app`)
-local/auth-gateway.conf           nginx config that serves GoTrue under `/auth/v1`, like a hosted project
+compose.yaml                      local Postgres (`supabase/postgres`), local Supabase Auth with an nginx gateway that serves GoTrue under `/auth/v1` like a hosted project (profile `auth`), and the API image (profile `app`)
 apps/web/                         reserved for post-MVP; not created now
 ```
 

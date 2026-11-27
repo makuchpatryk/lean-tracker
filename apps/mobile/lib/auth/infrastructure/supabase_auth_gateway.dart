@@ -13,8 +13,7 @@ import 'auth_error_mapping.dart';
 class SupabaseAuthGateway implements AuthGateway {
   /// [callbackUrl] is the deep link the Auth emails and OAuth redirect to; the composition root passes
   /// it in, because a module never imports `app/`.
-  SupabaseAuthGateway(this._auth, {required String callbackUrl})
-    : _callbackUrl = callbackUrl {
+  SupabaseAuthGateway(this._auth, this._callbackUrl) {
     _current = _auth.currentSession == null
         ? AuthStatus.signedOut
         : AuthStatus.signedIn;

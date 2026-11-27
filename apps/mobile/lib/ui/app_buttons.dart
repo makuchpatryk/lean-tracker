@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'tokens.dart';
 
-enum _Kind { primary, secondary, text }
+enum _Kind { primary, secondary }
 
 /// Filled pill button of the DESIGN boards (primary color).
 class PrimaryButton extends StatelessWidget {

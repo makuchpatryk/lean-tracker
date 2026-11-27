@@ -55,7 +55,27 @@ services:
     profiles: ["auth"]
     image: nginx:1.30.8-alpine
     depends_on: { auth: { condition: service_healthy } }
-    volumes: ["./local/auth-gateway.conf:/etc/nginx/conf.d/default.conf:ro"]
+    # Stand-in for the hosted Supabase gateway: supabase_flutter calls <SUPABASE_URL>/auth/v1/... and the API
+    # reads <SUPABASE_URL>/auth/v1/.well-known/jwks.json, but GoTrue serves its routes without that prefix.
+    # The config is written at start (no file to keep); `$$` keeps compose from reading nginx variables.
+    command:
+      - sh
+      - -c
+      - |
+        cat > /etc/nginx/conf.d/default.conf <<'EOF'
+        server {
+          listen 80;
+          location /auth/v1/ {
+            proxy_pass http://auth:9999/;
+            proxy_set_header Host $$host;
+            proxy_set_header X-Forwarded-Proto $$scheme;
+          }
+          location / {
+            return 404;
+          }
+        }
+        EOF
+        exec nginx -g 'daemon off;'
     ports: ["127.0.0.1:54321:80"]
   mailpit:
     profiles: ["auth"]
