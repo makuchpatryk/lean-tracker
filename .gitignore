@@ -104,3 +104,8 @@ postgres-data/
 !.vscode/extensions.json
 !.vscode/settings.json.example
 .screencaster/
+
+# ---------------------------------------------------------------
+# Local toolchain caches (root Makefile, Docker-run tools)
+# ---------------------------------------------------------------
+.cache/

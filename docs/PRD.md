@@ -1,6 +1,6 @@
 # Lean Tracker — PRD
 
-**Version:** 1.0 | **Date:** 2026-11-24 | **Status:** Ready for implementation
+**Version:** 1.1 | **Date:** 2026-11-27 | **Status:** Ready for implementation
 
 # Part I — Business
 
@@ -469,7 +469,7 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 ## 14. Auth & Access Control
 - **Method:** Supabase Auth (email + password, Google, Apple). The Flutter app signs in through `supabase_flutter`. The Go API must verify the Supabase JWT (signature through project JWKS, `exp`, `aud`) on every request and read `user_id` from `sub`.
 - **Session:** Supabase access token with refresh token stored in secure storage; the app refreshes automatically.
-- **Data access:** Go connects to Postgres through a dedicated database role; every query on user tables must filter by `user_id` from the JWT. Row Level Security must be enabled on all tables with no policies for `anon` and `authenticated` roles, so direct access through Supabase REST is denied.
+- **Data access:** Go connects to Postgres as the Supabase `postgres` role (D-62). That role bypasses Row Level Security, so isolation rests on every query on user tables filtering by `user_id` from the JWT. Row Level Security must be enabled on all tables with no policies for `anon` and `authenticated` roles, so direct access through Supabase REST is denied.
 - **Access matrix:**
 | Resource / Action | User (owner) | User (other) |
 |-------------------|--------------|--------------|
@@ -520,12 +520,13 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 ## 18. Tech Stack
 | Layer | Choice | Version (if fixed) |
 |-------|--------|--------------------|
-| Frontend | Flutter (Dart), Material 3, Drift (SQLite), supabase_flutter, mobile scanner plugin, local notifications plugin | latest stable at project start |
-| Backend | Go REST API, OpenAPI 3 contract, generated Dart client | latest stable Go at project start |
+| Frontend | Flutter (Dart), Material 3, `flutter_riverpod` (state), `go_router` (routing), Drift (SQLite), supabase_flutter, mobile scanner plugin, local notifications plugin | latest stable at project start |
+| Backend | Go REST API on `net/http` (`pgx` for Postgres, `golang-jwt` + `keyfunc` for JWT/JWKS), OpenAPI 3 contract, server generated with `oapi-codegen` (strict std-http), Dart client generated with `swagger_parser` (`dio` + `retrofit`) | latest stable Go at project start |
 | Database | Supabase Postgres (Free plan) + Supabase Auth | — |
 | Hosting / Deployment | Google Cloud Run (Docker container) for the Go API; TestFlight and Google Play internal testing for the app | — |
 | CI/CD | GitHub Actions: tests on every push; manual workflows for API deploy (with migrations) and mobile builds (see 18.2) | — |
 | Testing | Unit tests for Go and Flutter (business rules BR-003, BR-006, BR-015, sync conflict resolution) | — |
+| Local toolchain | Docker Compose (`supabase/postgres`) for the database; every tool (Go, golangci-lint, Flutter) runs in a pinned Docker image through the root `Makefile`; tool versions are the image variables at its top | — |
 - **Repo structure:** single monorepo with strictly separated applications and modules (see 18.1):
   - `/apps/mobile` — Flutter application.
   - `/apps/api` — Go API.
@@ -556,7 +557,7 @@ Everything in this section is built in M8 (D-61), except the lint and unit-test 
 ## 19. Implementation Plan
 
 ### M1: Repo, database and API skeleton
-- **Includes:** monorepo setup with the structure and module skeletons from 18.1, SQL migrations for all tables (section 13) applied to a local Postgres, Go service with JWT middleware and health endpoint, OpenAPI file, local run with Docker Compose. M1 works locally only: deployment, hosted migrations and secrets (18.2) are built in M8 (D-61); the lint and unit-test workflow is added in M1 (D-69).
+- **Includes:** monorepo setup with the repository structure from 18.1 (a module is created by the milestone that first gives it behavior), SQL migrations for all tables (section 13) applied to a local Postgres, Go service with JWT middleware and health endpoint, OpenAPI file, local run with Docker Compose. M1 works locally only: deployment, hosted migrations and secrets (18.2) are built in M8 (D-61); the lint and unit-test workflow is added in M1 (D-69).
 - **Depends on:** —
 - **Definition of done:** a request without a valid JWT returns 401; migrations apply to an empty local Postgres; the API runs locally.
 
@@ -661,6 +662,13 @@ Everything in this section is built in M8 (D-61), except the lint and unit-test 
 | D-59 | AI meal-photo recognition and Firebase Analytics are removed from the MVP and recorded as future scope (section 23) | Keep in MVP | User choice; decisions D-10, D-24, D-34, D-43, D-45, D-48 and the KPI measurement method are deferred with them |
 | D-60 | UI follows `docs/DESIGN.html` (14 boards, light and dark palettes, Nunito) on top of Material 3 components | Plain Material 3 with a seed color | User choice; the design file was added after PRD v1.0. Bundling the Nunito font as an app asset and mapping the tokens to the Flutter `ColorScheme` are derived, not confirmed separately |
 | D-61 | CI, deployment, hosted migrations and secrets (18.2) are built last, in M8; M1–M7 run and are tested locally only | CI and deploy in M1 | User choice; everything works locally first, so nothing earlier needs the pipeline |
+| D-62 | The Go API connects to Postgres as the Supabase `postgres` role; isolation relies on every query filtering by `user_id` from the JWT (BR-001) | Dedicated database role | User choice for simplicity; bends the dedicated-role wording of §14. RLS still blocks Supabase REST |
+| D-63 | Flutter state with `flutter_riverpod` (providers declared in `app/`), routing with `go_router` | Provider, Bloc; Navigator 2 by hand | User choice |
+| D-64 | Go server generated with `oapi-codegen` (strict server on std `net/http`) into `apps/api/internal/gen/openapi`; Dart client generated with `swagger_parser` into `lib/gen/`; generated code is committed and never edited | openapi-generator; hand-written handlers or chi | User choice; the generated Go package sits outside `platform/` so module `transport` layers can implement it |
+| D-65 | JWT verified with `golang-jwt` v5 and `keyfunc` v3 against the project JWKS; only ES256 and RS256 accepted; JWKS fetched lazily so the API starts without an Auth server | Fail fast on JWKS errors; HS256 shared secret | User choice; legacy HS256-only projects are rejected by design |
+| D-66 | Tools run in pinned Docker images through the root `Makefile`; local stack is `docker compose` with Postgres only (`supabase/postgres`, no local Auth); migrations are verified by applying them (`make db-reset`) | Host-installed toolchain; Supabase CLI stack; goose or golang-migrate | User choice |
+| D-67 | Error body is flat `{code, message}` with a closed `ErrorCode` list in the contract; `GET /v1/health` returns `Health` `{status: ok\|unavailable}` (200 or 503) | Nested `{error:{...}}`; shared Error body for 503 | User choice |
+| D-68 | No empty module skeletons in M1; "unique per owner" for product barcode and for favorites applies to live rows only (partial unique indexes where `deleted_at is null`) | Skeletons for all nine modules; plain unique constraints | User choice for skeletons and the barcode index; the same rule for favorites is derived, not confirmed separately. A deleted product's barcode and a removed favorite can be reused |
 | D-69 | A GitHub Actions workflow runs `make lint` and `make test` on every push to `main` and every pull request, from M1; deploy, hosted migrations, secrets and the secret scan stay in M8 | Wait for M8 | User choice; amends D-61 |
 
 ## 21. Open Questions

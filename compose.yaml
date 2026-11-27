@@ -1,0 +1,21 @@
+services:
+  db:
+    image: supabase/postgres:17.12.0.005
+    environment:
+      POSTGRES_PASSWORD: postgres # local only, not a secret
+    ports: ["54322:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost"]
+      interval: 2s
+      retries: 30
+  api:
+    profiles: ["app"]
+    build: ./apps/api
+    depends_on: { db: { condition: service_healthy } }
+    ports: ["8080:8080"]
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres?sslmode=disable
+      SUPABASE_JWKS_URL: ${SUPABASE_JWKS_URL:-http://127.0.0.1:9/auth/v1/.well-known/jwks.json}
+volumes:
+  pgdata:

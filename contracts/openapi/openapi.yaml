@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info: { title: Lean Tracker API, version: 0.1.0 }
+servers: [{ url: http://localhost:8080 }]
+security: [{ bearerAuth: [] }]
+paths:
+  /v1/health:
+    get:
+      operationId: getHealth
+      summary: Liveness and database ping. The only public route.
+      security: []
+      responses:
+        '200': { description: API and database reachable, content: { application/json: { schema: { $ref: '#/components/schemas/Health' } } } }
+        '503': { description: Database ping failed,       content: { application/json: { schema: { $ref: '#/components/schemas/Health' } } } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  responses:
+    Unauthorized:
+      description: Missing or invalid access token
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [ok, unavailable] }
+    ErrorCode:
+      type: string
+      enum: [UNAUTHORIZED] # closed list; later milestones append codes
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        message: { type: string }

@@ -1,0 +1,12 @@
+package: openapi
+generate:
+  std-http-server: true
+  strict-server: true
+  models: true
+output: openapi.gen.go
+output-options:
+  # Keep schemas no route references yet (Error, ErrorCode): the 401 body in jwtauth uses them.
+  skip-prune: true
+compatibility:
+  # HealthStatusOk, ErrorCodeUNAUTHORIZED: enum constants never collide across schemas.
+  always-prefix-enum-values: true
