@@ -4,8 +4,10 @@
 
 // Clients
 export 'fallback/fallback_client.dart';
+export 'settings/settings_client.dart';
 // Data classes
 export 'models/health.dart';
+export 'models/settings.dart';
 export 'models/error_code.dart';
 export 'models/error.dart';
 export 'models/health_status.dart';

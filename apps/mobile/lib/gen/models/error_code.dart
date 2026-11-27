@@ -8,6 +8,12 @@ import 'package:json_annotation/json_annotation.dart';
 enum ErrorCode {
   @JsonValue('UNAUTHORIZED')
   unauthorized('UNAUTHORIZED'),
+  @JsonValue('VALIDATION_ERROR')
+  validationError('VALIDATION_ERROR'),
+  @JsonValue('SETTINGS_NOT_FOUND')
+  settingsNotFound('SETTINGS_NOT_FOUND'),
+  @JsonValue('INTERNAL_ERROR')
+  internalError('INTERNAL_ERROR'),
   /// Default value for all unparsed values, allows backward compatibility when adding new values on the backend.
   $unknown(null);
 

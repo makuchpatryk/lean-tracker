@@ -20,7 +20,7 @@ func (f fakePinger) Ping(context.Context) error { return f.err }
 func getHealth(t *testing.T, db httpapi.Pinger) *httptest.ResponseRecorder {
 	t.Helper()
 	mux := http.NewServeMux()
-	openapi.HandlerWithOptions(openapi.NewStrictHandler(httpapi.NewHealthServer(db), nil), openapi.StdHTTPServerOptions{BaseRouter: mux})
+	openapi.HandlerWithOptions(openapi.NewStrictHandler(newTestAPI(db), nil), openapi.StdHTTPServerOptions{BaseRouter: mux})
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/v1/health", nil))
 	return rec

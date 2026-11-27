@@ -76,10 +76,14 @@ Shared building blocks outside modules:
 ```
 apps/mobile/                      Flutter application
   openapi.yaml                    committed copy of the API contract (make sync-contract; checked by make check-contract)
+  env/example.json                build-time config template (`--dart-define-from-file=env/local.json`, git-ignored)
+  assets/fonts/                   Nunito variable font and its OFL license
   lib/main.dart                   entry point; calls app/ only
   lib/app/                        composition root (wiring, router, database, sync registration)
   lib/kernel/                     framework-free primitives
-  lib/ui/                         theme, shared widgets, l10n
+  lib/ui/                         theme, design tokens, shared widgets (fields, buttons, mascot)
+  lib/l10n/                       ARB files (EN, PL) and the generated localizations (committed)
+  lib/kernel/limits/              rule values mirrored from the contract
   lib/gen/                        generated API client (never edited; `make gen-dart`)
   lib/<module>/<module>.dart      the module's only public file
   lib/<module>/domain/
@@ -92,16 +96,18 @@ apps/api/                         Go application
   db/migrations/                  SQL migrations (forward-only)
   db/local/                       local-only auth stand-in, not a migration, never applied to a hosted project
   cmd/api/main.go                 composition root
+  cmd/devjwk/                     dev tool: writes the local Auth signing key (`make auth-keys`)
   internal/<module>/<module>.go   the module's only public package (facade)
   internal/<module>/internal/domain/
   internal/<module>/internal/application/
   internal/<module>/internal/infrastructure/
   internal/<module>/internal/transport/
   internal/platform/              technical services
-  internal/kernel/                framework-free primitives (`requestuser`: user id in `context`)
+  internal/kernel/                framework-free primitives (`requestuser`: user id in `context`; `clock`; `limits`)
   internal/gen/openapi/           generated server interface and models (never edited; `make gen-go`)
 Makefile                          Docker-run toolchain: gen, lint, test, local database
-compose.yaml                      local Postgres (`supabase/postgres`) and the API image behind a profile
+compose.yaml                      local Postgres (`supabase/postgres`), local Supabase Auth (profile `auth`) and the API image (profile `app`)
+local/auth-gateway.conf           nginx config that serves GoTrue under `/auth/v1`, like a hosted project
 apps/web/                         reserved for post-MVP; not created now
 ```
 
@@ -153,8 +159,9 @@ PRD 18.1 names nine capabilities. A module exists in an application only where t
 | AD6 | Rule values both applications need are mirrored in each `kernel/limits` and compared with the contract by a test |
 | AD7 | The generated Go server lives in `internal/gen/openapi`, not in `platform/`, so a module's `transport` can implement it without importing `platform/` |
 | AD8 | The authenticated user id travels in the request `context` through `kernel/requestuser`; `platform/jwtauth` sets it, `transport` reads it |
-| AD9 | Riverpod providers are declared in `app/`; routing uses `go_router` |
+| AD9 | Riverpod providers are declared in `app/`; routing uses `go_router`. A module's screens need use cases without importing `app/`, so the module declares the providers they read, with its port provider (`authGatewayProvider`, `goalsRepositoryProvider`) as an override point; `app/` plugs in the real adapter (`appOverrides()`) and derives what the router watches |
 | AD10 | The API owns the contract (`apps/api/openapi.yaml`) and the schema (`apps/api/db/`); each client keeps a committed copy of the contract checked by `make check-contract` (PRD D-70) |
+| AD11 | A Go module's public package builds its own adapters from a database handle and a clock that `cmd/api` passes in, because Go's `internal/` rule hides `settings/internal/infrastructure` from `cmd/api`. `cmd/api` stays the composition root: it creates the pool and the clock and embeds each module's handler in one server struct |
 
 ## Open items
 

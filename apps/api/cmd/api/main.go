@@ -13,10 +13,12 @@ import (
 	"syscall"
 	"time"
 
+	"example.com/lean-tracker/apps/api/internal/kernel/clock"
 	"example.com/lean-tracker/apps/api/internal/platform/config"
 	"example.com/lean-tracker/apps/api/internal/platform/database"
 	"example.com/lean-tracker/apps/api/internal/platform/httpapi"
 	"example.com/lean-tracker/apps/api/internal/platform/jwtauth"
+	"example.com/lean-tracker/apps/api/internal/settings"
 )
 
 const shutdownTimeout = 10 * time.Second
@@ -47,9 +49,13 @@ func run(getenv func(string) string) error {
 		return err
 	}
 
+	api := apiServer{
+		HealthServer: httpapi.NewHealthServer(pool),
+		Handler:      settings.New(pool, clock.System{}),
+	}
 	server := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           httpapi.NewHandler(verifier, httpapi.NewHealthServer(pool)),
+		Handler:           httpapi.NewHandler(verifier, api),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,

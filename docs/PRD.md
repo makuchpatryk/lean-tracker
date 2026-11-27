@@ -1,6 +1,6 @@
 # Lean Tracker — PRD
 
-**Version:** 1.1 | **Date:** 2026-11-27 | **Status:** Ready for implementation
+**Version:** 1.2 | **Date:** 2026-11-27 | **Status:** Ready for implementation
 
 # Part I — Business
 
@@ -222,11 +222,13 @@
 ## 11. User Flows
 
 ### UF-001: Registration
-1. App shows login screen with fields email, password, buttons Sign up, Sign in, Google, Apple.
+1. App shows login screen with fields email, password, the link "Forgot your password?", buttons Sign up, Sign in, Google, Apple.
 2. User taps Sign up and submits email and password.
+2a. App shows the check-email screen: "Check your email to confirm your account. Open the link on this phone." with the button "Back to sign in". The user opens the link from the email on this phone; the app opens through the deep link `io.github.example.leantracker://auth-callback` and signs the user in. Google and Apple sign-in skip this step.
 3. App shows goals form (four fields); Save is enabled when all four are valid.
 4. App opens the Diary.
-- **Error states:** invalid email → "Enter a valid email address."; password shorter than 8 characters → "Password must have at least 8 characters."; email taken → "This email is already registered."; no network → "No connection. Try again."
+- **Forgot password:** the link opens the screen "Reset password" ("Enter your email. We will send a link to set a new password.") with the button "Send link"; after sending it shows "Check your email to reset your password."; the link in the email opens the screen "Set a new password" with the button "Save password"; after saving, the user is signed in and continues as in steps 3–4. "Back to sign in" returns to the login screen.
+- **Error states:** invalid email → "Enter a valid email address."; password shorter than 8 characters → "Password must have at least 8 characters."; email taken → "This email is already registered."; no network → "No connection. Try again."; wrong credentials → "Wrong email or password."; email not confirmed → "Confirm your email first. Check your inbox."; Google or Apple failed or cancelled → "Sign-in failed. Try again."; anything else → "Something went wrong. Try again."; the goals could not be loaded → "No connection. Try again." with the button "Try again".
 - **Empty states:** N/A.
 
 ### UF-002: Diary
@@ -258,6 +260,7 @@
 
 ### UF-006: Settings
 1. Sections: Goals, Reminders (up to 3 times), Language follows system (no manual switch), Delete account, Sign out.
+- **M2 scope:** the Settings screen has Goals (energy and macros summary, edit button), "Language and theme" ("Follows system settings.") and the button "Sign out". Reminders and Delete account arrive in M7.
 - **Error states:** adding a fourth reminder is disabled with message "Maximum 3 reminders."
 
 ## 12. Functional Requirements
@@ -268,7 +271,7 @@
 - **Inputs / validation:** email (valid format), password (≥ 8 characters).
 - **Edge cases:** Apple sign-in must be offered on iOS and Android; session must persist across app restarts.
 - **Acceptance criteria:**
-  - Given an unregistered email and a 8-character password, when the user submits sign-up, then an account is created and the consent screen is shown.
+  - Given an unregistered email and a 8-character password, when the user submits sign-up, then an account is created and the check-email screen is shown (there is no consent screen: analytics is future scope, §23).
   - Given a password of 7 characters, when the user submits, then the error "Password must have at least 8 characters." is shown and no account is created.
   - Given a registered user, when the app restarts, then the user stays signed in.
 
@@ -279,7 +282,7 @@
 - **Edge cases:** goals changes apply to all days (no history of goals).
 - **Acceptance criteria:**
   - Given kcal = 499, when the user saves, then the error "Enter a value from 500 to 10000." is shown.
-  - Given valid goals, when the user saves, then the Diary shows the new goals.
+  - Given valid goals, when the user saves, then the Diary shows the new goals. (The Diary exists from M3; in M2 the saved goals show in Settings → Goals.)
 
 ### FR-003: Diary of the day
 - **Implements:** BR-004, BR-005, BR-015 (totals), goal
@@ -672,6 +675,10 @@ Everything in this section is built in M8 (D-61), except the lint and unit-test 
 | D-68 | No empty module skeletons in M1; "unique per owner" for product barcode and for favorites applies to live rows only (partial unique indexes where `deleted_at is null`) | Skeletons for all nine modules; plain unique constraints | User choice for skeletons and the barcode index; the same rule for favorites is derived, not confirmed separately. A deleted product's barcode and a removed favorite can be reused |
 | D-69 | A GitHub Actions workflow runs `make lint` and `make test` on every push to `main` and every pull request, from M1; deploy, hosted migrations, secrets and the secret scan stay in M8 | Wait for M8 | User choice; amends D-61 |
 | D-70 | The OpenAPI contract is owned by the API at `apps/api/openapi.yaml`; the mobile app keeps a committed copy at `apps/mobile/openapi.yaml` that `make check-contract` (part of `make lint`, run in CI) keeps byte-identical; the database schema lives in `apps/api/db/` (`migrations/`, `local/`). Supersedes the root `contracts/openapi` and `db/` locations | Root `contracts/` and `db/` shared by all applications; mobile reading the API's file directly; symlink | User choice: each application owns what it uses and never reaches into another's folder |
+| D-71 | Local Supabase Auth: GoTrue (`supabase/auth`) on the compose database, behind an nginx gateway that serves the hosted `/auth/v1` paths, with Mailpit catching the emails; started by `make up`. The ES256 dev signing key is generated by `make auth-keys` into the git-ignored `.cache/`. Amends D-66 (the local stack is no longer Postgres only) | Hosted Auth with a seed helper; hosted database (bends D-61); Supabase CLI stack (needs a host install, against D-66) | User choice: the email flows run without a hosted project and offline |
+| D-72 | Email confirmation is on, with a check-email screen; password reset ships in M2; the deep link is `io.github.example.leantracker://auth-callback`; Google and Apple sign-in use Supabase OAuth in the browser (no native SDKs); the auth flow is PKCE | Confirmation off; reset later; native `google_sign_in` and `sign_in_with_apple` (two more packages, more platform config) | User choice; fewer packages and one code path |
+| D-73 | In M2 the goals are stored only through the API (`GET` and `PUT /v1/settings`, one `Settings` schema without `updated_at`); there is no local cache until Drift arrives in M3; the error codes `VALIDATION_ERROR`, `SETTINGS_NOT_FOUND` and `INTERNAL_ERROR` are generic and reused by later routes | Local cache now (throwaway before Drift); route-specific codes; separate input and output schemas | User choice |
+| D-74 | The session is kept with `flutter_secure_storage` (PRD §14), `yaml` is a dev dependency for the AD6 limits test, and `API_BASE_URL` is a non-secret `--dart-define` next to `SUPABASE_URL` and `SUPABASE_ANON_KEY` | The `supabase_flutter` default (SharedPreferences) | Owner-approved 2026-11-27; §14 requires secure storage |
 
 ## 21. Open Questions
 None.
