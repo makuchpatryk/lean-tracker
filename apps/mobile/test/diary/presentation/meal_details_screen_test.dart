@@ -1,3 +1,6 @@
+@Tags(['widget'])
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lean_tracker/diary/domain/meal.dart';
 import 'package:lean_tracker/diary/presentation/meal_details_screen.dart';

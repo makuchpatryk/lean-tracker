@@ -1,3 +1,6 @@
+@Tags(['widget'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lean_tracker/diary/domain/meal.dart';
@@ -43,21 +46,12 @@ void main() {
   ) async {
     await pumpCreate(tester);
 
-    for (final text in ['0', '10000.1', '1.25', '']) {
-      await tester.enterText(find.byType(TextField), text);
-      await tester.pump();
+    // The range rules themselves are covered in quantity_test.dart; here only the wiring.
+    await tester.enterText(find.byType(TextField), '0');
+    await tester.pump();
 
-      expect(
-        find.text('Enter a quantity from 0.1 to 10000.'),
-        findsOneWidget,
-        reason: text,
-      );
-      expect(
-        tester.widget<FilledButton>(saveButton).onPressed,
-        isNull,
-        reason: text,
-      );
-    }
+    expect(find.text('Enter a quantity from 0.1 to 10000.'), findsOneWidget);
+    expect(tester.widget<FilledButton>(saveButton).onPressed, isNull);
   });
 
   testWidgets('150 g of a 200 kcal product previews 300 kcal (FR-004)', (

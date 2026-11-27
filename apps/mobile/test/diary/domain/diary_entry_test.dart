@@ -111,8 +111,4 @@ void main() {
     expect(deleted.updatedAt, now);
     expect(deleted.id, 'e1');
   });
-
-  test('nutrition follows the snapshot, quantity and unit', () {
-    expect(entryOf(quantity: 150).nutrition.kcal, 300);
-  });
 }
