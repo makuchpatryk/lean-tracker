@@ -542,10 +542,10 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 - **Application boundaries:** `/apps/mobile`, `/apps/api` and the future `/apps/web` must not import each other's code. They must share only the OpenAPI contract in `/contracts/openapi`. Code shared between applications must not exist outside generated clients.
 
 ### 18.2 Deployment & DevOps
-Everything in this section is built in M8 (D-61). Until then the system runs and is tested locally only.
+Everything in this section is built in M8 (D-61), except the lint and unit-test workflow, which exists from M1 (D-69). Until M8 the system runs locally only.
 
 - **Environments:** exactly one environment, `test`: one Supabase project, one Cloud Run service for `/apps/api`. No production environment exists in the MVP.
-- **Pipeline on every push and pull request (GitHub Actions):** Go unit tests, Flutter unit tests, repository secret scan. A failure must block merging into `main`.
+- **Pipeline on every push and pull request (GitHub Actions):** lint (`make lint`), Go unit tests, Flutter unit tests (`make test`), repository secret scan (the secret scan is built in M8). A failure must block merging into `main`.
 - **API deployment:** a manually triggered GitHub Actions workflow (`workflow_dispatch`) run on `main`. It must execute in this order: (1) run tests, (2) apply SQL migrations from `/db/migrations` to the `test` Supabase project, (3) build the Go container image, (4) push the image to a container registry, (5) deploy it to Cloud Run. If any step fails, the workflow must stop and must not execute later steps.
 - **Migrations:** forward-only SQL files, numbered in ascending order, applied by the pipeline with the Supabase CLI. A migration must not be edited after it has been applied.
 - **Secrets:** stored in GitHub Secrets and injected into Cloud Run as environment variables at deploy time. Required secrets: `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `DATABASE_URL`, `SUPABASE_JWKS_URL`. Secrets must not appear in the repository or in workflow logs.
@@ -556,7 +556,7 @@ Everything in this section is built in M8 (D-61). Until then the system runs and
 ## 19. Implementation Plan
 
 ### M1: Repo, database and API skeleton
-- **Includes:** monorepo setup with the structure and module skeletons from 18.1, SQL migrations for all tables (section 13) applied to a local Postgres, Go service with JWT middleware and health endpoint, OpenAPI file, local run with Docker Compose. M1 works locally only: CI, deployment, hosted migrations and secrets (18.2) are built in M8 (D-61).
+- **Includes:** monorepo setup with the structure and module skeletons from 18.1, SQL migrations for all tables (section 13) applied to a local Postgres, Go service with JWT middleware and health endpoint, OpenAPI file, local run with Docker Compose. M1 works locally only: deployment, hosted migrations and secrets (18.2) are built in M8 (D-61); the lint and unit-test workflow is added in M1 (D-69).
 - **Depends on:** —
 - **Definition of done:** a request without a valid JWT returns 401; migrations apply to an empty local Postgres; the API runs locally.
 
@@ -591,7 +591,7 @@ Everything in this section is built in M8 (D-61). Until then the system runs and
 - **Definition of done:** acceptance criteria of FR-012, FR-016 pass.
 
 ### M8: Localization, accessibility, distribution
-- **Includes:** the whole of 18.2, built last (D-61): the CI pipeline on every push and pull request, the manual API deploy workflow with hosted migrations, secrets and Cloud Run deploy, and the manual mobile build and upload workflow; FR-017, accessibility requirements (section 16), TestFlight and Google Play internal testing builds, NFR verification.
+- **Includes:** the rest of 18.2, built last (D-61): the repository secret scan added to the CI pipeline (lint and tests exist since D-69), the manual API deploy workflow with hosted migrations, secrets and Cloud Run deploy, and the manual mobile build and upload workflow; FR-017, accessibility requirements (section 16), TestFlight and Google Play internal testing builds, NFR verification.
 - **Depends on:** M7.
 - **Definition of done:** CI is green and blocks merging on failure; the API deploys to Cloud Run and migrations apply to an empty Supabase project; the app is installable by friends through internal testing channels; all NFRs verified.
 
@@ -661,6 +661,7 @@ Everything in this section is built in M8 (D-61). Until then the system runs and
 | D-59 | AI meal-photo recognition and Firebase Analytics are removed from the MVP and recorded as future scope (section 23) | Keep in MVP | User choice; decisions D-10, D-24, D-34, D-43, D-45, D-48 and the KPI measurement method are deferred with them |
 | D-60 | UI follows `docs/DESIGN.html` (14 boards, light and dark palettes, Nunito) on top of Material 3 components | Plain Material 3 with a seed color | User choice; the design file was added after PRD v1.0. Bundling the Nunito font as an app asset and mapping the tokens to the Flutter `ColorScheme` are derived, not confirmed separately |
 | D-61 | CI, deployment, hosted migrations and secrets (18.2) are built last, in M8; M1–M7 run and are tested locally only | CI and deploy in M1 | User choice; everything works locally first, so nothing earlier needs the pipeline |
+| D-69 | A GitHub Actions workflow runs `make lint` and `make test` on every push to `main` and every pull request, from M1; deploy, hosted migrations, secrets and the secret scan stay in M8 | Wait for M8 | User choice; amends D-61 |
 
 ## 21. Open Questions
 None.

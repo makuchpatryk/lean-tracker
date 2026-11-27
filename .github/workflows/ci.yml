@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: tools-lint-${{ hashFiles('apps/api/go.sum', 'apps/mobile/pubspec.lock') }}
+          restore-keys: tools-lint-
+      - run: make lint
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: tools-test-${{ hashFiles('apps/api/go.sum', 'apps/mobile/pubspec.lock') }}
+          restore-keys: tools-test-
+      - run: make test
