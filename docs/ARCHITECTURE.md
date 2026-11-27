@@ -48,7 +48,7 @@ The code is organised in rings. The inner rings hold what the app *is* (business
 ### Independent applications, shared contract
 
 - `apps/mobile`, `apps/api` and the future `apps/web` share no code.
-- The only thing between them is the contract `contracts/openapi/openapi.yaml`. Clients are generated from it and never edited by hand.
+- The contract is owned by the API (`apps/api/openapi.yaml`); the mobile app keeps a committed copy (`apps/mobile/openapi.yaml`) that `make check-contract` keeps byte-identical. Clients are generated from it and never edited by hand.
 - **Contract first:** a change that crosses applications starts in the contract.
 
 ### Tested
@@ -75,6 +75,7 @@ Shared building blocks outside modules:
 
 ```
 apps/mobile/                      Flutter application
+  openapi.yaml                    committed copy of the API contract (make sync-contract; checked by make check-contract)
   lib/main.dart                   entry point; calls app/ only
   lib/app/                        composition root (wiring, router, database, sync registration)
   lib/kernel/                     framework-free primitives
@@ -87,6 +88,9 @@ apps/mobile/                      Flutter application
   lib/<module>/presentation/
   test/<module>/                  mirrors lib/<module>/
 apps/api/                         Go application
+  openapi.yaml                    the contract between applications (owned here; contract first)
+  db/migrations/                  SQL migrations (forward-only)
+  db/local/                       local-only auth stand-in, not a migration, never applied to a hosted project
   cmd/api/main.go                 composition root
   internal/<module>/<module>.go   the module's only public package (facade)
   internal/<module>/internal/domain/
@@ -96,9 +100,6 @@ apps/api/                         Go application
   internal/platform/              technical services
   internal/kernel/                framework-free primitives (`requestuser`: user id in `context`)
   internal/gen/openapi/           generated server interface and models (never edited; `make gen-go`)
-contracts/openapi/                the only contract between applications
-db/migrations/                    SQL migrations (forward-only)
-db/local/                         local-only auth stand-in, not a migration, never applied to a hosted project
 Makefile                          Docker-run toolchain: gen, lint, test, local database
 compose.yaml                      local Postgres (`supabase/postgres`) and the API image behind a profile
 apps/web/                         reserved for post-MVP; not created now
@@ -129,7 +130,7 @@ PRD 18.1 names nine capabilities. A module exists in an application only where t
 - A module that needs another module's data declares its own small type instead of importing the other's entity (AD3).
 - Business rules live in `domain` or `application`, never in widgets, handlers, adapters or SQL.
 - Only the composition root creates adapters. Nothing imports the composition root.
-- Applications never import each other; they meet only in `contracts/openapi`.
+- Applications never import each other; they meet only in the contract (the API's `openapi.yaml` and each client's checked copy).
 - Mobile: Flutter, Drift, `supabase_flutter`, plugins and `lib/gen/` appear only in `infrastructure` (Flutter also in `presentation`, `ui/`, `app/`).
 - API: SQL only in `infrastructure` repositories; Go `internal/` keeps a module's layers private to it.
 
@@ -153,6 +154,7 @@ PRD 18.1 names nine capabilities. A module exists in an application only where t
 | AD7 | The generated Go server lives in `internal/gen/openapi`, not in `platform/`, so a module's `transport` can implement it without importing `platform/` |
 | AD8 | The authenticated user id travels in the request `context` through `kernel/requestuser`; `platform/jwtauth` sets it, `transport` reads it |
 | AD9 | Riverpod providers are declared in `app/`; routing uses `go_router` |
+| AD10 | The API owns the contract (`apps/api/openapi.yaml`) and the schema (`apps/api/db/`); each client keeps a committed copy of the contract checked by `make check-contract` (PRD D-70) |
 
 ## Open items
 

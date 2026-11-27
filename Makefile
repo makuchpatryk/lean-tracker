@@ -13,11 +13,18 @@ GO_RUN = docker run --rm --user $(UID_GID) -e HOME=/tmp \
 FLUTTER_RUN = docker run --rm -e PUB_CACHE=/work/.cache/pub -v $(CURDIR):/work -w /work/apps/mobile $(FLUTTER_IMAGE) sh -c
 FLUTTER_FIX = ; status=$$?; chown -R $(UID_GID) /work/apps/mobile /work/.cache/pub; exit $$status
 
-.PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart up down db-reset run-api
+.PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart up down db-reset run-api sync-contract check-contract
 
 gen: gen-go gen-dart
-lint: lint-go lint-dart
+lint: check-contract lint-go lint-dart
 test: test-go test-dart
+
+# The API owns the contract; the mobile app keeps a committed copy (D-70).
+sync-contract:
+	cp apps/api/openapi.yaml apps/mobile/openapi.yaml
+
+check-contract:
+	@cmp -s apps/api/openapi.yaml apps/mobile/openapi.yaml || { echo "apps/mobile/openapi.yaml differs from apps/api/openapi.yaml: run make sync-contract"; exit 1; }
 
 gen-go:
 	$(GO_RUN) $(GO_IMAGE) go generate ./internal/gen/...
@@ -47,7 +54,7 @@ down:
 db-reset:
 	docker compose down -v
 	$(MAKE) up
-	for f in db/local/00_auth_stub.sql db/migrations/*.sql; do \
+	for f in apps/api/db/local/00_auth_stub.sql apps/api/db/migrations/*.sql; do \
 	  echo "apply $$f"; \
 	  docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d postgres -f - < $$f || exit 1; \
 	done

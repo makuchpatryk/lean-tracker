@@ -27,9 +27,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# Dart client generated from the OpenAPI contract: `make gen-dart`. Output is committed and never edited.
+# Dart client generated from apps/mobile/openapi.yaml, the committed copy of the API contract (make sync-contract): make gen-dart. Output is committed and never edited.
 swagger_parser:
-  schema_path: ../../contracts/openapi/openapi.yaml
+  schema_path: openapi.yaml
   output_directory: lib/gen
   language: dart
   json_serializer: json_serializable

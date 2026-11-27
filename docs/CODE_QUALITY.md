@@ -43,12 +43,12 @@ Rules the code is written and reviewed against. Product: [PRD](PRD.md). Structur
 
 | Knowledge | Lives in |
 | --- | --- |
-| Wire contract: routes, schemas, error codes, field limits | `contracts/openapi/openapi.yaml` |
+| Wire contract: routes, schemas, error codes, field limits | `apps/api/openapi.yaml` (mobile copy `apps/mobile/openapi.yaml`, kept identical by `make check-contract`) |
 | Rule values (ranges, caps, timeouts) | the contract; mirrored in each app's `kernel/limits`, checked by a test |
 | Business rules | the owning module's `domain` (or `application`) |
 | UI text (PL, EN) | `apps/mobile/lib/l10n/*.arb` |
 | Theme and design tokens | `apps/mobile/lib/ui/` |
-| Database schema | `db/migrations/` (server), Drift tables in `infrastructure/` (device) |
+| Database schema | `apps/api/db/migrations/` (server), Drift tables in `infrastructure/` (device) |
 | Configuration names | the API config validation and `*.example` env files |
 | Tool versions | root `Makefile` image variables (`apps/api/Dockerfile` and `go.mod` follow them) |
 | Generated clients and server stubs | `make gen` from the contract |

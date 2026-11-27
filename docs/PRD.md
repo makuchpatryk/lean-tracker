@@ -531,8 +531,9 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
   - `/apps/mobile` — Flutter application.
   - `/apps/api` — Go API.
   - `/apps/web` — reserved for the post-MVP web application; must not be created in the MVP.
-  - `/contracts/openapi` — OpenAPI file, the only contract between applications; the Dart client is generated from it.
-  - `/db/migrations` — SQL migrations.
+  - `/apps/api/openapi.yaml` — OpenAPI file, the only contract between applications; owned by the API.
+  - `/apps/api/db/migrations` — SQL migrations.
+  - `/apps/mobile/openapi.yaml` — committed copy of the contract, checked by `make check-contract`; the Dart client is generated from it.
   - `/docs` — this PRD.
   - `/.github/workflows` — CI/CD.
 
@@ -540,14 +541,14 @@ All tables are in Supabase Postgres. All timestamps are `timestamptz` in UTC. Al
 - **Style:** Clean Architecture in both `/apps/mobile` and `/apps/api`. Each application must be split into modules by business capability (`auth`, `settings`, `products`, `diary`, `favorites_recents`, `summary`, `reminders`, `sync`, `account`), and each module must contain the layers `domain`, `application`, `infrastructure`, `presentation` (mobile) or `transport` (API).
 - **Dependency rule:** `domain` must not import any other layer, any framework package or any other module's internals. `application` must depend only on `domain` and on interfaces (ports) defined in `domain` or `application`. `infrastructure` and `presentation`/`transport` must depend inward only. Business rules BR-xxx must be implemented in `domain` or `application`.
 - **Module boundaries:** a module must communicate with other modules only through its public interface (a single exported API per module: `lib/<module>/<module>.dart` in Flutter, the exported package API in Go; no imports of other modules' `internal` or `src` paths).
-- **Application boundaries:** `/apps/mobile`, `/apps/api` and the future `/apps/web` must not import each other's code. They must share only the OpenAPI contract in `/contracts/openapi`. Code shared between applications must not exist outside generated clients.
+- **Application boundaries:** `/apps/mobile`, `/apps/api` and the future `/apps/web` must not import each other's code. They must share only the OpenAPI contract, owned by the API at `/apps/api/openapi.yaml`; each other application keeps a byte-identical copy checked by `make check-contract`. Code shared between applications must not exist outside generated clients.
 
 ### 18.2 Deployment & DevOps
 Everything in this section is built in M8 (D-61), except the lint and unit-test workflow, which exists from M1 (D-69). Until M8 the system runs locally only.
 
 - **Environments:** exactly one environment, `test`: one Supabase project, one Cloud Run service for `/apps/api`. No production environment exists in the MVP.
 - **Pipeline on every push and pull request (GitHub Actions):** lint (`make lint`), Go unit tests, Flutter unit tests (`make test`), repository secret scan (the secret scan is built in M8). A failure must block merging into `main`.
-- **API deployment:** a manually triggered GitHub Actions workflow (`workflow_dispatch`) run on `main`. It must execute in this order: (1) run tests, (2) apply SQL migrations from `/db/migrations` to the `test` Supabase project, (3) build the Go container image, (4) push the image to a container registry, (5) deploy it to Cloud Run. If any step fails, the workflow must stop and must not execute later steps.
+- **API deployment:** a manually triggered GitHub Actions workflow (`workflow_dispatch`) run on `main`. It must execute in this order: (1) run tests, (2) apply SQL migrations from `/apps/api/db/migrations` to the `test` Supabase project, (3) build the Go container image, (4) push the image to a container registry, (5) deploy it to Cloud Run. If any step fails, the workflow must stop and must not execute later steps.
 - **Migrations:** forward-only SQL files, numbered in ascending order, applied by the pipeline with the Supabase CLI. A migration must not be edited after it has been applied.
 - **Secrets:** stored in GitHub Secrets and injected into Cloud Run as environment variables at deploy time. Required secrets: `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `DATABASE_URL`, `SUPABASE_JWKS_URL`. Secrets must not appear in the repository or in workflow logs.
 - **Google Cloud access:** the workflow authenticates with a service account JSON key stored in GitHub Secrets. The service account must have only the roles required to deploy to Cloud Run and push images.
@@ -670,6 +671,7 @@ Everything in this section is built in M8 (D-61), except the lint and unit-test 
 | D-67 | Error body is flat `{code, message}` with a closed `ErrorCode` list in the contract; `GET /v1/health` returns `Health` `{status: ok\|unavailable}` (200 or 503) | Nested `{error:{...}}`; shared Error body for 503 | User choice |
 | D-68 | No empty module skeletons in M1; "unique per owner" for product barcode and for favorites applies to live rows only (partial unique indexes where `deleted_at is null`) | Skeletons for all nine modules; plain unique constraints | User choice for skeletons and the barcode index; the same rule for favorites is derived, not confirmed separately. A deleted product's barcode and a removed favorite can be reused |
 | D-69 | A GitHub Actions workflow runs `make lint` and `make test` on every push to `main` and every pull request, from M1; deploy, hosted migrations, secrets and the secret scan stay in M8 | Wait for M8 | User choice; amends D-61 |
+| D-70 | The OpenAPI contract is owned by the API at `apps/api/openapi.yaml`; the mobile app keeps a committed copy at `apps/mobile/openapi.yaml` that `make check-contract` (part of `make lint`, run in CI) keeps byte-identical; the database schema lives in `apps/api/db/` (`migrations/`, `local/`). Supersedes the root `contracts/openapi` and `db/` locations | Root `contracts/` and `db/` shared by all applications; mobile reading the API's file directly; symlink | User choice: each application owns what it uses and never reaches into another's folder |
 
 ## 21. Open Questions
 None.
