@@ -4,6 +4,7 @@ go 1.27.0
 
 require (
 	github.com/MicahParks/keyfunc/v3 v3.9.2
+	github.com/getkin/kin-openapi v0.153.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jackc/pgx/v5 v5.13.0
 	github.com/oapi-codegen/runtime v1.9.1
@@ -12,7 +13,6 @@ require (
 require (
 	github.com/MicahParks/jwkset v0.11.4 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/getkin/kin-openapi v0.153.0 // indirect
 	github.com/go-openapi/jsonpointer v1.0.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

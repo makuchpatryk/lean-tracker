@@ -13,7 +13,7 @@ GO_RUN = docker run --rm --user $(UID_GID) -e HOME=/tmp \
 FLUTTER_RUN = docker run --rm -e PUB_CACHE=/work/.cache/pub -v $(CURDIR):/work -w /work/apps/mobile $(FLUTTER_IMAGE) sh -c
 FLUTTER_FIX = ; status=$$?; chown -R $(UID_GID) /work/apps/mobile /work/.cache/pub; exit $$status
 
-.PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart up down db-reset run-api sync-contract check-contract
+.PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart auth-keys up down db-reset run-api sync-contract check-contract
 
 gen: gen-go gen-dart
 lint: check-contract lint-go lint-dart
@@ -30,7 +30,7 @@ gen-go:
 	$(GO_RUN) $(GO_IMAGE) go generate ./internal/gen/...
 
 gen-dart:
-	$(FLUTTER_RUN) 'flutter pub get && dart run swagger_parser && dart run build_runner build --delete-conflicting-outputs $(FLUTTER_FIX)'
+	$(FLUTTER_RUN) 'flutter pub get && flutter gen-l10n && dart run swagger_parser && dart run build_runner build --delete-conflicting-outputs $(FLUTTER_FIX)'
 
 lint-go:
 	$(GO_RUN) $(GOLANGCI_IMAGE) golangci-lint run ./...
@@ -39,25 +39,30 @@ test-go:
 	$(GO_RUN) $(GO_IMAGE) go test -count=1 ./...
 
 lint-dart:
-	$(FLUTTER_RUN) 'flutter pub get && dart format --output=none --set-exit-if-changed lib/main.dart lib/app test && flutter analyze --fatal-infos $(FLUTTER_FIX)'
+	$(FLUTTER_RUN) 'flutter pub get && dart format --output=none --set-exit-if-changed lib/main.dart lib/app lib/kernel lib/ui lib/auth lib/settings test && flutter analyze --fatal-infos $(FLUTTER_FIX)'
 
 test-dart:
 	$(FLUTTER_RUN) 'flutter test $(FLUTTER_FIX)'
 
-up:
-	docker compose up -d --wait db
+# The local GoTrue signing key (PRD D-71): created once in the git-ignored .cache/, never overwritten.
+auth-keys:
+	@test -f .cache/auth/jwt-keys.json || $(GO_RUN) $(GO_IMAGE) go run ./cmd/devjwk -out /work/.cache/auth/jwt-keys.json
+
+up: auth-keys
+	docker compose --profile auth up -d --wait db auth auth-gateway mailpit
 
 down:
-	docker compose --profile app down
+	docker compose --profile app --profile auth down
 
-# Local data is disposable: drop the volume, start an empty Postgres, apply the auth stub and every migration in order.
+# Local data is disposable: drop the volumes, start an empty Postgres, apply the auth stub and every migration in order, then start the auth stack (it runs after our migrations).
 db-reset:
-	docker compose down -v
-	$(MAKE) up
+	docker compose --profile app --profile auth down -v
+	docker compose up -d --wait db
 	for f in apps/api/db/local/00_auth_stub.sql apps/api/db/migrations/*.sql; do \
 	  echo "apply $$f"; \
 	  docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d postgres -f - < $$f || exit 1; \
 	done
+	$(MAKE) up
 
 run-api:
 	docker compose --profile app up --build -d --wait

@@ -18,5 +18,8 @@ Map<String, dynamic> _$ErrorToJson(Error instance) => <String, dynamic>{
 
 const _$ErrorCodeEnumMap = {
   ErrorCode.unauthorized: 'UNAUTHORIZED',
+  ErrorCode.validationError: 'VALIDATION_ERROR',
+  ErrorCode.settingsNotFound: 'SETTINGS_NOT_FOUND',
+  ErrorCode.internalError: 'INTERNAL_ERROR',
   ErrorCode.$unknown: r'$unknown',
 };

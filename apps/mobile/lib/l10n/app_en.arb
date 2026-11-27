@@ -1,0 +1,215 @@
+{
+  "@@locale": "en",
+  "appTitle": "Lean Tracker",
+  "@appTitle": {
+    "description": "App name in the title bar and task switcher."
+  },
+  "loginTagline": "Log meals fast and calmly.",
+  "@loginTagline": {
+    "description": "Tagline under the logo on the login screen."
+  },
+  "emailLabel": "Email",
+  "@emailLabel": {
+    "description": "Label of the email field."
+  },
+  "passwordLabel": "Password (min. 8 characters)",
+  "@passwordLabel": {
+    "description": "Label of the password field; 8 is Limits.passwordMinLength."
+  },
+  "forgotPasswordLink": "Forgot your password?",
+  "@forgotPasswordLink": {
+    "description": "Link on the login screen that opens the reset flow."
+  },
+  "signInButton": "Sign in",
+  "@signInButton": {
+    "description": "Primary button on the login screen."
+  },
+  "signUpButton": "Sign up",
+  "@signUpButton": {
+    "description": "Secondary button on the login screen."
+  },
+  "orDivider": "or",
+  "@orDivider": {
+    "description": "Divider between email sign-in and social sign-in."
+  },
+  "continueWithGoogle": "Continue with Google",
+  "@continueWithGoogle": {
+    "description": "Google sign-in button."
+  },
+  "continueWithApple": "Continue with Apple",
+  "@continueWithApple": {
+    "description": "Apple sign-in button."
+  },
+  "errorInvalidEmail": "Enter a valid email address.",
+  "@errorInvalidEmail": {
+    "description": "Shown under the email field for a malformed address (PRD UF-001)."
+  },
+  "errorPasswordTooShort": "Password must have at least 8 characters.",
+  "@errorPasswordTooShort": {
+    "description": "Shown when the password has fewer than 8 characters (FR-001)."
+  },
+  "errorEmailTaken": "This email is already registered.",
+  "@errorEmailTaken": {
+    "description": "Shown when sign-up finds an existing account (PRD UF-001)."
+  },
+  "errorNoConnection": "No connection. Try again.",
+  "@errorNoConnection": {
+    "description": "Shown when the network is unreachable (PRD UF-001)."
+  },
+  "errorSocialSignIn": "Sign-in failed. Try again.",
+  "@errorSocialSignIn": {
+    "description": "Shown when Google or Apple sign-in fails or is cancelled (PRD §15)."
+  },
+  "errorWrongCredentials": "Wrong email or password.",
+  "@errorWrongCredentials": {
+    "description": "Shown when sign-in credentials are rejected."
+  },
+  "errorEmailNotConfirmed": "Confirm your email first. Check your inbox.",
+  "@errorEmailNotConfirmed": {
+    "description": "Shown when the account email is not confirmed yet."
+  },
+  "errorUnknown": "Something went wrong. Try again.",
+  "@errorUnknown": {
+    "description": "Fallback for an unexpected failure."
+  },
+  "checkEmailTitle": "Check your email",
+  "@checkEmailTitle": {
+    "description": "Title of the check-email screen shown after sign-up."
+  },
+  "checkEmailBody": "Check your email to confirm your account. Open the link on this phone.",
+  "@checkEmailBody": {
+    "description": "Body of the check-email screen."
+  },
+  "backToSignIn": "Back to sign in",
+  "@backToSignIn": {
+    "description": "Button that returns to the login screen."
+  },
+  "resetTitle": "Reset password",
+  "@resetTitle": {
+    "description": "Title of the forgot-password screen."
+  },
+  "resetBody": "Enter your email. We will send a link to set a new password.",
+  "@resetBody": {
+    "description": "Explanation on the forgot-password screen."
+  },
+  "resetSend": "Send link",
+  "@resetSend": {
+    "description": "Button that requests the reset email."
+  },
+  "resetSent": "Check your email to reset your password.",
+  "@resetSent": {
+    "description": "Confirmation after the reset email was requested."
+  },
+  "newPasswordTitle": "Set a new password",
+  "@newPasswordTitle": {
+    "description": "Title of the new-password screen opened from the reset link."
+  },
+  "newPasswordSave": "Save password",
+  "@newPasswordSave": {
+    "description": "Button that stores the new password."
+  },
+  "goalsTitle": "Your daily goals",
+  "@goalsTitle": {
+    "description": "Title of the goals screen."
+  },
+  "goalsSubtitle": "Enter them manually. You can change them later in settings.",
+  "@goalsSubtitle": {
+    "description": "Subtitle of the onboarding goals screen."
+  },
+  "goalsMascot": "I'm Blueberry. Let's start with your goals.",
+  "@goalsMascot": {
+    "description": "Mascot line on the onboarding goals screen."
+  },
+  "goalKcalLabel": "Energy (500–10000)",
+  "@goalKcalLabel": {
+    "description": "Label of the energy goal field; the range is Limits.goalKcalMin..goalKcalMax."
+  },
+  "goalProteinLabel": "Protein (0–1000)",
+  "@goalProteinLabel": {
+    "description": "Label of the protein goal field."
+  },
+  "goalFatLabel": "Fat (0–1000)",
+  "@goalFatLabel": {
+    "description": "Label of the fat goal field."
+  },
+  "goalCarbsLabel": "Carbohydrates (0–1000)",
+  "@goalCarbsLabel": {
+    "description": "Label of the carbohydrates goal field."
+  },
+  "unitKcal": "kcal",
+  "@unitKcal": {
+    "description": "Unit suffix of the energy field."
+  },
+  "unitGram": "g",
+  "@unitGram": {
+    "description": "Unit suffix of the macro fields."
+  },
+  "goalsSaveAndContinue": "Save and go to diary",
+  "@goalsSaveAndContinue": {
+    "description": "Button on the onboarding goals screen."
+  },
+  "goalsSave": "Save",
+  "@goalsSave": {
+    "description": "Button on the edit goals screen."
+  },
+  "errorKcalRange": "Enter a value from 500 to 10000.",
+  "@errorKcalRange": {
+    "description": "Shown when the energy goal is out of range (FR-002)."
+  },
+  "errorMacroRange": "Enter a value from 0 to 1000.",
+  "@errorMacroRange": {
+    "description": "Shown when a macro goal is out of range."
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title of the settings screen."
+  },
+  "settingsGoals": "Goals",
+  "@settingsGoals": {
+    "description": "Settings section for the daily goals."
+  },
+  "settingsEnergy": "Energy",
+  "@settingsEnergy": {
+    "description": "Energy row label in the goals summary."
+  },
+  "settingsMacros": "Protein / fat / carbs",
+  "@settingsMacros": {
+    "description": "Macros row label in the goals summary."
+  },
+  "settingsLanguageTheme": "Language and theme",
+  "@settingsLanguageTheme": {
+    "description": "Settings row about language and theme."
+  },
+  "settingsFollowsSystem": "Follows system settings.",
+  "@settingsFollowsSystem": {
+    "description": "Value of the language and theme row (FR-017)."
+  },
+  "signOut": "Sign out",
+  "@signOut": {
+    "description": "Button that signs the user out."
+  },
+  "navDiary": "Diary",
+  "@navDiary": {
+    "description": "Bottom bar destination."
+  },
+  "navSettings": "Settings",
+  "@navSettings": {
+    "description": "Bottom bar destination."
+  },
+  "diaryPlaceholder": "Diary arrives in the next version.",
+  "@diaryPlaceholder": {
+    "description": "Temporary Diary body, removed in M3."
+  },
+  "retry": "Try again",
+  "@retry": {
+    "description": "Retry button."
+  },
+  "mascotLabel": "Blueberry, the app mascot.",
+  "@mascotLabel": {
+    "description": "Screen reader name of the mascot illustration."
+  },
+  "settingsEditGoals": "Edit goals",
+  "@settingsEditGoals": {
+    "description": "Screen reader label of the edit button in the Goals section of Settings."
+  }
+}

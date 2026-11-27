@@ -2,9 +2,89 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Placeholder route, replaced by the real screens in M2.
-final routerProvider = Provider<GoRouter>(
-  (ref) => GoRouter(
-    routes: [GoRoute(path: '/', builder: (context, state) => const Scaffold())],
-  ),
-);
+import '../auth/auth.dart';
+import '../settings/settings.dart';
+import 'diary_placeholder_screen.dart';
+import 'providers.dart';
+import 'route_guard.dart';
+import 'shell_scaffold.dart';
+import 'start_screen.dart';
+
+/// The router. The guard is the pure [redirectFor]; it is re-run whenever the auth status or the
+/// goals status changes (PRD UF-001, BP-006).
+final routerProvider = Provider<GoRouter>((ref) {
+  final refresh = ValueNotifier<int>(0);
+  ref
+    ..onDispose(refresh.dispose)
+    ..listen(authStatusProvider, (_, _) => refresh.value++)
+    ..listen(goalsStatusProvider, (_, _) => refresh.value++);
+
+  return GoRouter(
+    initialLocation: Routes.start,
+    refreshListenable: refresh,
+    redirect: (context, state) => redirectFor(
+      auth: ref.read(authStatusProvider).value ?? AuthStatus.loading,
+      goals: ref.read(goalsStatusProvider),
+      location: state.uri.path,
+    ),
+    routes: [
+      GoRoute(path: Routes.start, builder: (_, _) => const StartScreen()),
+      GoRoute(
+        path: Routes.login,
+        builder: (context, _) => LoginScreen(
+          onForgotPassword: () => context.go(Routes.forgotPassword),
+        ),
+      ),
+      GoRoute(
+        path: Routes.checkEmail,
+        builder: (_, _) => const CheckEmailScreen(),
+      ),
+      GoRoute(
+        path: Routes.forgotPassword,
+        builder: (context, _) =>
+            ForgotPasswordScreen(onBack: () => context.go(Routes.login)),
+      ),
+      GoRoute(
+        path: Routes.newPassword,
+        builder: (_, _) => const NewPasswordScreen(),
+      ),
+      GoRoute(path: Routes.goals, builder: (_, _) => const GoalsScreen()),
+      // The custom-scheme link also reaches go_router, as "/" or "/auth-callback"; supabase_flutter
+      // exchanges the code on its own, and the guard picks the screen once the session is known.
+      GoRoute(path: '/', redirect: (_, _) => Routes.start),
+      GoRoute(path: Routes.authCallback, redirect: (_, _) => Routes.start),
+      StatefulShellRoute.indexedStack(
+        builder: (_, _, shell) => ShellScaffold(shell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.diary,
+                builder: (_, _) => const DiaryPlaceholderScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.settings,
+                builder: (context, _) => SettingsScreen(
+                  onEditGoals: () => context.go(Routes.editGoals),
+                  onSignOut: () => ref.read(signOutProvider)(),
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'goals',
+                    builder: (context, _) => EditGoalsScreen(
+                      onDone: () => context.go(Routes.settings),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+});

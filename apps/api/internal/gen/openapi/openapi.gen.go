@@ -16,13 +16,22 @@ import (
 
 // Defines values for ErrorCode.
 const (
-	ErrorCodeUNAUTHORIZED ErrorCode = "UNAUTHORIZED"
+	ErrorCodeINTERNALERROR    ErrorCode = "INTERNAL_ERROR"
+	ErrorCodeSETTINGSNOTFOUND ErrorCode = "SETTINGS_NOT_FOUND"
+	ErrorCodeUNAUTHORIZED     ErrorCode = "UNAUTHORIZED"
+	ErrorCodeVALIDATIONERROR  ErrorCode = "VALIDATION_ERROR"
 )
 
 // Valid indicates whether the value is a known member of the ErrorCode enum.
 func (e ErrorCode) Valid() bool {
 	switch e {
+	case ErrorCodeINTERNALERROR:
+		return true
+	case ErrorCodeSETTINGSNOTFOUND:
+		return true
 	case ErrorCodeUNAUTHORIZED:
+		return true
+	case ErrorCodeVALIDATIONERROR:
 		return true
 	default:
 		return false
@@ -64,14 +73,34 @@ type Health struct {
 // HealthStatus defines model for Health.Status.
 type HealthStatus string
 
+// Settings defines model for Settings.
+type Settings struct {
+	GoalCarbsG   int `json:"goal_carbs_g"`
+	GoalFatG     int `json:"goal_fat_g"`
+	GoalKcal     int `json:"goal_kcal"`
+	GoalProteinG int `json:"goal_protein_g"`
+}
+
+// InternalError defines model for InternalError.
+type InternalError = Error
+
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = Error
+
+// PutSettingsJSONRequestBody defines body for PutSettings for application/json ContentType.
+type PutSettingsJSONRequestBody = Settings
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// GetHealth Liveness and database ping. The only public route.
 	// (GET /v1/health)
 	GetHealth(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/settings)
+	GetSettings(w http.ResponseWriter, r *http.Request)
+
+	// (PUT /v1/settings)
+	PutSettings(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -88,6 +117,34 @@ func (siw *ServerInterfaceWrapper) GetHealth(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetHealth(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetSettings operation middleware
+func (siw *ServerInterfaceWrapper) GetSettings(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSettings(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutSettings operation middleware
+func (siw *ServerInterfaceWrapper) PutSettings(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutSettings(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -218,9 +275,13 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/health", wrapper.GetHealth)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/settings", wrapper.GetSettings)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/settings", wrapper.PutSettings)
 
 	return m
 }
+
+type InternalErrorJSONResponse Error
 
 type UnauthorizedJSONResponse Error
 
@@ -259,11 +320,144 @@ func (response GetHealth503JSONResponse) VisitGetHealthResponse(w http.ResponseW
 	return err
 }
 
+type GetSettingsRequestObject struct {
+}
+
+type GetSettingsResponseObject interface {
+	VisitGetSettingsResponse(w http.ResponseWriter) error
+}
+
+type GetSettings200JSONResponse Settings
+
+func (response GetSettings200JSONResponse) VisitGetSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := runtime.JSONMarshalWrite(&buf, response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSettings401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response GetSettings401JSONResponse) VisitGetSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := runtime.JSONMarshalWrite(&buf, response.UnauthorizedJSONResponse); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSettings404JSONResponse Error
+
+func (response GetSettings404JSONResponse) VisitGetSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := runtime.JSONMarshalWrite(&buf, response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSettings500JSONResponse struct{ InternalErrorJSONResponse }
+
+func (response GetSettings500JSONResponse) VisitGetSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := runtime.JSONMarshalWrite(&buf, response.InternalErrorJSONResponse); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PutSettingsRequestObject struct {
+	Body *PutSettingsJSONRequestBody
+}
+
+type PutSettingsResponseObject interface {
+	VisitPutSettingsResponse(w http.ResponseWriter) error
+}
+
+type PutSettings200JSONResponse Settings
+
+func (response PutSettings200JSONResponse) VisitPutSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := runtime.JSONMarshalWrite(&buf, response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PutSettings400JSONResponse Error
+
+func (response PutSettings400JSONResponse) VisitPutSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := runtime.JSONMarshalWrite(&buf, response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PutSettings401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response PutSettings401JSONResponse) VisitPutSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := runtime.JSONMarshalWrite(&buf, response.UnauthorizedJSONResponse); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PutSettings500JSONResponse struct{ InternalErrorJSONResponse }
+
+func (response PutSettings500JSONResponse) VisitPutSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := runtime.JSONMarshalWrite(&buf, response.InternalErrorJSONResponse); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// GetHealth Liveness and database ping. The only public route.
 	// (GET /v1/health)
 	GetHealth(ctx context.Context, request GetHealthRequestObject) (GetHealthResponseObject, error)
+
+	// (GET /v1/settings)
+	GetSettings(ctx context.Context, request GetSettingsRequestObject) (GetSettingsResponseObject, error)
+
+	// (PUT /v1/settings)
+	PutSettings(ctx context.Context, request PutSettingsRequestObject) (PutSettingsResponseObject, error)
 }
 
 // StrictHandlerFunc and StrictMiddlewareFunc are type aliases rather than
@@ -325,6 +519,61 @@ func (sh *strictHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetHealthResponseObject); ok {
 		if err := validResponse.VisitGetHealthResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetSettings operation middleware
+func (sh *strictHandler) GetSettings(w http.ResponseWriter, r *http.Request) {
+	var request GetSettingsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error) {
+		return sh.ssi.GetSettings(ctx, request.(GetSettingsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetSettings")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetSettingsResponseObject); ok {
+		if err := validResponse.VisitGetSettingsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PutSettings operation middleware
+func (sh *strictHandler) PutSettings(w http.ResponseWriter, r *http.Request) {
+	var request PutSettingsRequestObject
+
+	var body PutSettingsJSONRequestBody
+	if err := runtime.BindJSONBody(r, &body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error) {
+		return sh.ssi.PutSettings(ctx, request.(PutSettingsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PutSettings")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PutSettingsResponseObject); ok {
+		if err := validResponse.VisitPutSettingsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
