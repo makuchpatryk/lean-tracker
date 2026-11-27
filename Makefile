@@ -13,11 +13,22 @@ GO_RUN = docker run --rm --user $(UID_GID) -e HOME=/tmp \
 FLUTTER_RUN = docker run --rm -e PUB_CACHE=/work/.cache/pub -v $(CURDIR):/work -w /work/apps/mobile $(FLUTTER_IMAGE) sh -c
 FLUTTER_FIX = ; status=$$?; chown -R $(UID_GID) /work/apps/mobile /work/.cache/pub; exit $$status
 
-.PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart auth-keys up down db-reset run-api sync-contract check-contract
+.PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart check check-go check-dart auth-keys up down db-reset run-api sync-contract check-contract
 
 gen: gen-go gen-dart
 lint: lint-go lint-dart
 test: test-go test-dart
+
+# Quick loop: `make test-dart T=test/diary` or `make test-go T=./internal/settings/...` runs one package.
+# T is relative to the app (apps/mobile for Dart, apps/api for Go); empty means everything.
+#
+# `make -j2 check` runs Go and Flutter side by side. Go lint and tests share no state with Flutter.
+# Flutter lint and tests both run `pub get` and chown apps/mobile, so check-dart runs them one after the other.
+check: check-go check-dart
+check-go: lint-go test-go
+check-dart:
+	$(MAKE) lint-dart
+	$(MAKE) test-dart
 
 # The API owns the contract; the mobile app keeps a committed copy (D-70).
 sync-contract:
@@ -36,13 +47,13 @@ lint-go:
 	$(GO_RUN) $(GOLANGCI_IMAGE) golangci-lint run ./...
 
 test-go:
-	$(GO_RUN) $(GO_IMAGE) go test -count=1 ./...
+	$(GO_RUN) $(GO_IMAGE) go test -count=1 $(or $(T),./...)
 
 lint-dart:
 	$(FLUTTER_RUN) 'flutter pub get && dart format --output=none --set-exit-if-changed lib/main.dart lib/app lib/kernel lib/ui lib/auth lib/settings lib/diary test && flutter analyze --fatal-infos $(FLUTTER_FIX)'
 
 test-dart:
-	$(FLUTTER_RUN) 'flutter test $(FLUTTER_FIX)'
+	$(FLUTTER_RUN) 'flutter test $(T) $(FLUTTER_FIX)'
 
 # The local GoTrue signing key (PRD D-71): created once in the git-ignored .cache/, never overwritten.
 auth-keys:
