@@ -10,14 +10,26 @@ GO_RUN = docker run --rm --user $(UID_GID) -e HOME=/tmp \
   -e GOCACHE=/work/.cache/go-build -e GOMODCACHE=/work/.cache/go-mod -e GOLANGCI_LINT_CACHE=/work/.cache/golangci \
   -v $(CURDIR):/work -w /work/apps/api
 # Flutter runs as root (the SDK cache in the image is root-owned) and hands files back to the host user.
-FLUTTER_RUN = docker run --rm -e PUB_CACHE=/work/.cache/pub -v $(CURDIR):/work -w /work/apps/mobile $(FLUTTER_IMAGE) sh -c
-FLUTTER_FIX = ; status=$$?; chown -R $(UID_GID) /work/apps/mobile /work/.cache/pub; exit $$status
+# .cache/dartserver keeps the analyzer cache between runs: a repeat `flutter analyze` takes ~3 s instead of ~20 s.
+FLUTTER_RUN = docker run --rm -e PUB_CACHE=/work/.cache/pub -v $(CURDIR):/work -v $(CURDIR)/.cache/dartserver:/root/.dartServer -w /work/apps/mobile $(FLUTTER_IMAGE) sh -c
+FLUTTER_FIX = ; status=$$?; chown -R $(UID_GID) /work/apps/mobile /work/.cache/pub /root/.dartServer; exit $$status
 
-.PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart auth-keys up down db-reset run-api sync-contract check-contract
+.PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart check check-go check-dart test-fast auth-keys up down db-reset run-api sync-contract check-contract
 
 gen: gen-go gen-dart
 lint: lint-go lint-dart
 test: test-go test-dart
+
+# Quick loop: `make test-dart T=test/diary` or `make test-go T=./internal/settings/...` runs one package.
+# T is relative to the app (apps/mobile for Dart, apps/api for Go); empty means everything.
+#
+# `make -j2 check` runs Go and Flutter side by side. Go lint and tests share no state with Flutter.
+# Flutter lint and tests both run `pub get` and chown apps/mobile, so check-dart runs them one after the other.
+check: check-go check-dart
+check-go: lint-go test-go
+check-dart:
+	$(MAKE) lint-dart
+	$(MAKE) test-dart
 
 # The API owns the contract; the mobile app keeps a committed copy (D-70).
 sync-contract:
@@ -36,13 +48,17 @@ lint-go:
 	$(GO_RUN) $(GOLANGCI_IMAGE) golangci-lint run ./...
 
 test-go:
-	$(GO_RUN) $(GO_IMAGE) go test -count=1 ./...
+	$(GO_RUN) $(GO_IMAGE) go test -count=1 $(or $(T),./...)
 
 lint-dart:
-	$(FLUTTER_RUN) 'flutter pub get && dart format --output=none --set-exit-if-changed lib/main.dart lib/app lib/kernel lib/ui lib/auth lib/settings test && flutter analyze --fatal-infos $(FLUTTER_FIX)'
+	$(FLUTTER_RUN) 'flutter pub get && dart format --output=none --set-exit-if-changed lib/main.dart lib/app lib/kernel lib/ui lib/auth lib/settings lib/diary test && flutter analyze --fatal-infos $(FLUTTER_FIX)'
 
 test-dart:
-	$(FLUTTER_RUN) 'flutter test $(FLUTTER_FIX)'
+	$(FLUTTER_RUN) 'flutter test $(T) $(FLUTTER_FIX)'
+
+# Inner loop: Dart unit tests only, widget tests (tag `widget`, see apps/mobile/dart_test.yaml) skipped.
+test-fast:
+	$(FLUTTER_RUN) 'flutter test --no-pub --exclude-tags widget $(FLUTTER_FIX)'
 
 # The local GoTrue signing key (PRD D-71): created once in the git-ignored .cache/, never overwritten.
 auth-keys:

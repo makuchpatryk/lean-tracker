@@ -1,0 +1,4 @@
+# Widget tests build the widget tree and are the slow part of `flutter test`.
+# `make test-fast` skips them: flutter test --exclude-tags widget
+tags:
+  widget:

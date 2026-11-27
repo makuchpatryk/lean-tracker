@@ -96,7 +96,15 @@ void main() {
     });
 
     test('goals saved leave the app screens alone', () {
-      for (final path in ['/diary', '/settings', '/settings/goals']) {
+      for (final path in [
+        '/diary',
+        '/settings',
+        '/settings/goals',
+        '/diary/meal/breakfast',
+        '/diary/add',
+        '/diary/add/quantity',
+        '/diary/entry/e1',
+      ]) {
         expect(redirect(AuthStatus.signedIn, GoalsStatus.saved, path), isNull);
       }
     });
@@ -114,6 +122,10 @@ void main() {
       '/diary',
       '/settings',
       '/settings/goals',
+      '/diary/meal/breakfast',
+      '/diary/add',
+      '/diary/add/quantity',
+      '/diary/entry/e1',
     ];
     for (final auth in AuthStatus.values) {
       for (final goals in GoalsStatus.values) {

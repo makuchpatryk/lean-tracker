@@ -1,0 +1,15 @@
+# Drift modular generation: each module's table file gets its own *.drift.dart with a typed table
+# class, so a module's repository can query through a plain GeneratedDatabase without importing app/
+# (ARCHITECTURE AD12). The generated files are committed and never edited.
+targets:
+  $default:
+    builders:
+      drift_dev:
+        enabled: false
+      drift_dev:analyzer:
+        enabled: true
+        options: &options
+          store_date_time_values_as_text: false
+      drift_dev:modular:
+        enabled: true
+        options: *options

@@ -196,10 +196,6 @@
   "@navSettings": {
     "description": "Bottom bar destination."
   },
-  "diaryPlaceholder": "Diary arrives in the next version.",
-  "@diaryPlaceholder": {
-    "description": "Temporary Diary body, removed in M3."
-  },
   "retry": "Try again",
   "@retry": {
     "description": "Retry button."
@@ -211,5 +207,238 @@
   "settingsEditGoals": "Edit goals",
   "@settingsEditGoals": {
     "description": "Screen reader label of the edit button in the Goals section of Settings."
+  },
+  "diaryGreeting": "Hi!",
+  "@diaryGreeting": {
+    "description": "Greeting at the top of the Diary."
+  },
+  "diaryKcalLeft": "kcal left",
+  "@diaryKcalLeft": {
+    "description": "Label under the remaining kcal on the Diary summary card."
+  },
+  "diaryEaten": "Eaten",
+  "@diaryEaten": {
+    "description": "Label of the consumed kcal on the Diary summary card."
+  },
+  "diaryOfGoal": "of {goal} kcal",
+  "@diaryOfGoal": {
+    "description": "Consumed kcal compared to the goal; {goal} is the formatted kcal goal.",
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "macroProtein": "Protein",
+  "@macroProtein": {
+    "description": "Protein label."
+  },
+  "macroFat": "Fat",
+  "@macroFat": {
+    "description": "Fat label."
+  },
+  "macroCarbs": "Carbs",
+  "@macroCarbs": {
+    "description": "Carbohydrates label."
+  },
+  "macroOfGoal": "{value} / {goal} g",
+  "@macroOfGoal": {
+    "description": "Consumed grams of a macro over its goal, both formatted.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "mealBreakfast": "Breakfast",
+  "@mealBreakfast": {
+    "description": "Meal name (BR-005)."
+  },
+  "mealLunch": "Lunch",
+  "@mealLunch": {
+    "description": "Meal name (BR-005)."
+  },
+  "mealDinner": "Dinner",
+  "@mealDinner": {
+    "description": "Meal name (BR-005)."
+  },
+  "mealSnack": "Snacks",
+  "@mealSnack": {
+    "description": "Meal name (BR-005)."
+  },
+  "mealSummary": "{kcal} kcal · {count, plural, one{1 entry} other{{count} entries}}",
+  "@mealSummary": {
+    "description": "Meal card summary: formatted kcal and the number of entries.",
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noEntries": "No entries",
+  "@noEntries": {
+    "description": "Shown for a meal without entries (PRD UF-002)."
+  },
+  "mealKcalLabel": "kcal in this meal",
+  "@mealKcalLabel": {
+    "description": "Label under the kcal total on Meal details."
+  },
+  "entryLine": "{quantity} · P {protein} · F {fat} · C {carbs}",
+  "@entryLine": {
+    "description": "Entry line: formatted quantity with unit, then protein, fat and carbs in grams.",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      },
+      "fat": {
+        "type": "String"
+      },
+      "carbs": {
+        "type": "String"
+      }
+    }
+  },
+  "addProduct": "Add product",
+  "@addProduct": {
+    "description": "Button on Meal details that opens Add entry."
+  },
+  "addTo": "Add to: {meal}",
+  "@addTo": {
+    "description": "Header of the Add entry screen; {meal} is the meal name.",
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "noProducts": "No products yet",
+  "@noProducts": {
+    "description": "Shown on Add entry when there is no product source (M3 release builds)."
+  },
+  "per100": "{kcal} kcal / 100 {unit}",
+  "@per100": {
+    "description": "Energy per 100 g or ml of a product.",
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "servingInfo": "serving {size} {unit}",
+  "@servingInfo": {
+    "description": "Serving size of a product.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "unitServingWithSize": "serving ({size} {unit})",
+  "@unitServingWithSize": {
+    "description": "Serving unit chip with its size.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "unitMl": "ml",
+  "@unitMl": {
+    "description": "Unit: milliliter."
+  },
+  "quantityTitle": "Quantity",
+  "@quantityTitle": {
+    "description": "Title of the quantity form."
+  },
+  "quantityLabel": "Quantity",
+  "@quantityLabel": {
+    "description": "Label of the quantity field."
+  },
+  "mealLabel": "Meal",
+  "@mealLabel": {
+    "description": "Label of the meal chips on the quantity form."
+  },
+  "dateLabel": "Date",
+  "@dateLabel": {
+    "description": "Label of the date field on the quantity form."
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button of the quantity form."
+  },
+  "errorQuantityRange": "Enter a quantity from 0.1 to 10000.",
+  "@errorQuantityRange": {
+    "description": "Shown under the quantity field when it is invalid (PRD UF-003, BR-003)."
+  },
+  "errorEntryNotSaved": "Could not save entry.",
+  "@errorEntryNotSaved": {
+    "description": "SnackBar when an entry could not be stored (PRD UF-002)."
+  },
+  "deleteEntry": "Delete entry",
+  "@deleteEntry": {
+    "description": "Button that deletes an entry."
+  },
+  "deleteEntryQuestion": "Delete this entry?",
+  "@deleteEntryQuestion": {
+    "description": "Question of the delete confirmation dialog."
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button of a dialog."
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Confirm button of the delete dialog."
+  },
+  "a11yPreviousDay": "Previous day",
+  "@a11yPreviousDay": {
+    "description": "Screen reader label of the previous-day arrow."
+  },
+  "a11yNextDay": "Next day",
+  "@a11yNextDay": {
+    "description": "Screen reader label of the next-day arrow."
+  },
+  "a11yPickDate": "Pick a date",
+  "@a11yPickDate": {
+    "description": "Screen reader label of the calendar button."
+  },
+  "a11yAddToMeal": "Add entry to {meal}",
+  "@a11yAddToMeal": {
+    "description": "Screen reader label of a meal's plus button.",
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "a11yDecrease": "Decrease quantity",
+  "@a11yDecrease": {
+    "description": "Screen reader label of the minus button."
+  },
+  "a11yIncrease": "Increase quantity",
+  "@a11yIncrease": {
+    "description": "Screen reader label of the plus button."
+  },
+  "a11yNegative": "minus",
+  "@a11yNegative": {
+    "description": "Spoken in place of the minus sign before a negative number."
   }
 }

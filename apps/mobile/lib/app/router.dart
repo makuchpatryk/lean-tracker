@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../auth/auth.dart';
+import '../diary/diary.dart';
+import '../kernel/local_date.dart';
 import '../settings/settings.dart';
-import 'diary_placeholder_screen.dart';
 import 'providers.dart';
 import 'route_guard.dart';
 import 'shell_scaffold.dart';
@@ -60,7 +61,82 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.diary,
-                builder: (_, _) => const DiaryPlaceholderScreen(),
+                builder: (context, _) => DiaryScreen(
+                  onOpenMeal: (meal, date) => context.go(
+                    '${Routes.diaryMeal}/${meal.name}?date=${date.toIso()}',
+                  ),
+                  onAddEntry: (meal, date) => context.go(
+                    '${Routes.diaryAdd}?meal=${meal.name}&date=${date.toIso()}',
+                  ),
+                ),
+                routes: [
+                  // Unknown meal or date values go back to the Diary (untrusted boundary).
+                  GoRoute(
+                    path: 'meal/:meal',
+                    redirect: (_, state) =>
+                        _mealAndDate(state) == null ? Routes.diary : null,
+                    builder: (context, state) {
+                      final params = _mealAndDate(state);
+                      if (params == null) return const SizedBox.shrink();
+                      final (:meal, :date) = params;
+                      return MealDetailsScreen(
+                        meal: meal,
+                        date: date,
+                        onAddProduct: () => context.go(
+                          '${Routes.diaryAdd}?meal=${meal.name}&date=${date.toIso()}',
+                        ),
+                        onOpenEntry: (id) =>
+                            context.go('${Routes.diaryEntry}/$id'),
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'add',
+                    redirect: (_, state) =>
+                        _mealAndDate(state) == null ? Routes.diary : null,
+                    builder: (context, state) {
+                      final params = _mealAndDate(state);
+                      if (params == null) return const SizedBox.shrink();
+                      final (:meal, :date) = params;
+                      return AddEntryScreen(
+                        meal: meal,
+                        date: date,
+                        onPickProduct: (product) => context.go(
+                          '${Routes.diaryAddQuantity}?meal=${meal.name}&date=${date.toIso()}',
+                          extra: product,
+                        ),
+                      );
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'quantity',
+                        redirect: (_, state) =>
+                            _mealAndDate(state) == null ||
+                                state.extra is! ProductSnapshot
+                            ? Routes.diary
+                            : null,
+                        builder: (_, state) {
+                          final params = _mealAndDate(state);
+                          final product = state.extra;
+                          if (params == null || product is! ProductSnapshot) {
+                            return const SizedBox.shrink();
+                          }
+                          return EntryFormScreen.create(
+                            snapshot: product,
+                            meal: params.meal,
+                            date: params.date,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'entry/:id',
+                    builder: (_, state) => EntryFormScreen.edit(
+                      entryId: state.pathParameters['id'] ?? '',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -88,3 +164,14 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// The `meal` (path or query) and `date` (query) of a Diary child route, or null when either is not a
+/// known value. A redirect sends such a route to the Diary, so a builder only sees valid ones.
+({Meal meal, LocalDate date})? _mealAndDate(GoRouterState state) {
+  final meal =
+      Meal.values.asNameMap()[state.pathParameters['meal'] ??
+          state.uri.queryParameters['meal']];
+  final date = LocalDate.parseIso(state.uri.queryParameters['date'] ?? '');
+  if (meal == null || date == null) return null;
+  return (meal: meal, date: date);
+}

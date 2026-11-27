@@ -79,12 +79,13 @@ apps/mobile/                      Flutter application
   env/example.json                build-time config template (`--dart-define-from-file=env/local.json`, git-ignored)
   assets/fonts/                   Nunito variable font and its OFL license
   lib/main.dart                   entry point; calls app/ only
-  lib/app/                        composition root (wiring, router, database, sync registration)
+  lib/app/                        composition root (wiring, router, database, sync registration); `database.dart` composes the one Drift `AppDatabase`
   lib/kernel/                     framework-free primitives
   lib/ui/                         theme, design tokens, shared widgets (fields, buttons, mascot)
   lib/l10n/                       ARB files (EN, PL) and the generated localizations (committed)
   lib/kernel/limits/              rule values mirrored from the contract
   lib/gen/                        generated API client (never edited; `make gen-dart`)
+  build.yaml                      Drift modular generation; each `*.drift.dart` beside its table or database file is committed and never edited
   lib/<module>/<module>.dart      the module's only public file
   lib/<module>/domain/
   lib/<module>/application/
@@ -136,7 +137,7 @@ PRD 18.1 names nine capabilities. A module exists in an application only where t
 - Business rules live in `domain` or `application`, never in widgets, handlers, adapters or SQL.
 - Only the composition root creates adapters. Nothing imports the composition root.
 - Applications never import each other; they meet only in the contract (the API's `openapi.yaml` and each client's checked copy).
-- Mobile: Flutter, Drift, `supabase_flutter`, plugins and `lib/gen/` appear only in `infrastructure` (Flutter also in `presentation`, `ui/`, `app/`).
+- Mobile: Flutter, Drift, `supabase_flutter`, plugins and `lib/gen/` appear only in `infrastructure` (Flutter also in `presentation`, `ui/`, `app/`). Drift tables belong to the module that owns the data; `app/database.dart` only lists them and passes a `GeneratedDatabase` to each module's adapter (AD12).
 - API: SQL only in `infrastructure` repositories; Go `internal/` keeps a module's layers private to it.
 
 ## Cross-layer flow
@@ -161,6 +162,7 @@ PRD 18.1 names nine capabilities. A module exists in an application only where t
 | AD9 | Riverpod providers are declared in `app/`; routing uses `go_router`. A module's screens need use cases without importing `app/`, so the module declares the providers they read, with its port provider (`authGatewayProvider`, `goalsRepositoryProvider`) as an override point; `app/` plugs in the real adapter (`appOverrides()`) and derives what the router watches |
 | AD10 | The API owns the contract (`apps/api/openapi.yaml`) and the schema (`apps/api/db/`); each client keeps a committed copy of the contract checked by `make check-contract` (PRD D-70) |
 | AD11 | A Go module's public package builds its own adapters from a database handle and a clock that `cmd/api` passes in, because Go's `internal/` rule hides `settings/internal/infrastructure` from `cmd/api`. `cmd/api` stays the composition root: it creates the pool and the clock and embeds each module's handler in one server struct |
+| AD12 | Each mobile module owns its Drift tables in `infrastructure/`, generated in modular mode and exported through its public file. `app/` composes the single `AppDatabase` from them and gives each module's adapter a `GeneratedDatabase` (plus the user id), so a module never imports `app/` and its queries are typed |
 
 ## Open items
 

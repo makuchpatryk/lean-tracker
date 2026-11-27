@@ -8,6 +8,8 @@ environment:
 
 dependencies:
   dio: ^5.11.1
+  drift: ^2.28.0
+  drift_flutter: ^0.2.7
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -25,6 +27,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   build_runner: ^2.15.1
+  drift_dev: ^2.28.0
   swagger_parser: ^1.46.0
   retrofit_generator: ^10.3.3
   json_serializable: ^6.15.2

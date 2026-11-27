@@ -1,8 +1,12 @@
+@Tags(['widget'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lean_tracker/app/app.dart';
 import 'package:lean_tracker/auth/auth.dart';
+import 'package:lean_tracker/diary/diary.dart';
 import 'package:lean_tracker/settings/settings.dart';
 import 'package:lean_tracker/ui/tokens.dart';
 
@@ -25,6 +29,13 @@ Future<void> pumpApp(
         goalsRepositoryProvider.overrideWithValue(
           goals ?? FakeGoalsRepository(),
         ),
+        entryRepositoryProvider.overrideWithValue(FakeEntryRepository()),
+        productSourceProvider.overrideWithValue(const FakeProductSource()),
+        dailyGoalsProvider.overrideWithValue(
+          const DailyGoals(kcal: 2200, protein: 150, fat: 70, carbs: 240),
+        ),
+        clockProvider.overrideWithValue(FakeClock()),
+        uuidProvider.overrideWithValue(FakeUuid()),
       ],
       child: const LeanTrackerApp(),
     ),
@@ -86,7 +97,7 @@ void main() {
       );
 
       expect(find.text('Your daily goals'), findsOneWidget);
-      expect(find.text('Diary arrives in the next version.'), findsNothing);
+      expect(find.text('Hi!'), findsNothing);
     },
   );
 
@@ -103,7 +114,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Diary arrives in the next version.'), findsOneWidget);
+      expect(find.text('Hi!'), findsOneWidget);
+      expect(find.text('No entries'), findsWidgets);
     },
   );
 
