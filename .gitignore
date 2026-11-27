@@ -25,11 +25,9 @@ google-services.json
 *serviceAccount*.json
 
 # ---------------------------------------------------------------
-# Claude Code (local settings and task worktrees, CLAUDE.md skills)
+# Claude Code (settings, skills, task worktrees)
 # ---------------------------------------------------------------
-.claude/worktrees/
-.claude/settings.local.json
-.claude/scheduled_tasks.lock
+.claude/
 
 # ---------------------------------------------------------------
 # Flutter / Dart (apps/mobile)
