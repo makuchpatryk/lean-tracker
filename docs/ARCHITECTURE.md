@@ -79,7 +79,7 @@ apps/mobile/                      Flutter application
   lib/app/                        composition root (wiring, router, database, sync registration)
   lib/kernel/                     framework-free primitives
   lib/ui/                         theme, shared widgets, l10n
-  lib/gen/                        generated API client (never edited)
+  lib/gen/                        generated API client (never edited; `make gen-dart`)
   lib/<module>/<module>.dart      the module's only public file
   lib/<module>/domain/
   lib/<module>/application/
@@ -94,9 +94,13 @@ apps/api/                         Go application
   internal/<module>/internal/infrastructure/
   internal/<module>/internal/transport/
   internal/platform/              technical services
-  internal/kernel/                framework-free primitives
+  internal/kernel/                framework-free primitives (`requestuser`: user id in `context`)
+  internal/gen/openapi/           generated server interface and models (never edited; `make gen-go`)
 contracts/openapi/                the only contract between applications
 db/migrations/                    SQL migrations (forward-only)
+db/local/                         local-only auth stand-in, not a migration, never applied to a hosted project
+Makefile                          Docker-run toolchain: gen, lint, test, local database
+compose.yaml                      local Postgres (`supabase/postgres`) and the API image behind a profile
 apps/web/                         reserved for post-MVP; not created now
 ```
 
@@ -146,9 +150,10 @@ PRD 18.1 names nine capabilities. A module exists in an application only where t
 | AD4 | `sync` is generic: modules expose syncable data through a `SyncSource` port registered in `app/`; `sync` imports no feature module |
 | AD5 | Errors cross layers as typed domain errors, mapped only at the edge |
 | AD6 | Rule values both applications need are mirrored in each `kernel/limits` and compared with the contract by a test |
+| AD7 | The generated Go server lives in `internal/gen/openapi`, not in `platform/`, so a module's `transport` can implement it without importing `platform/` |
+| AD8 | The authenticated user id travels in the request `context` through `kernel/requestuser`; `platform/jwtauth` sets it, `transport` reads it |
+| AD9 | Riverpod providers are declared in `app/`; routing uses `go_router` |
 
 ## Open items
 
-1. **M1** — Flutter state management and routing (proposal: `flutter_riverpod` providers declared in `app/`, `go_router`).
-2. **M1** — OpenAPI generators.
-3. **M6** — shape of the `SyncSource` port and the sync contract.
+1. **M6** — shape of the `SyncSource` port and the sync contract.

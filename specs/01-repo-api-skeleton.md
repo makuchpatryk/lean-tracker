@@ -406,54 +406,54 @@ revoke all on public.recents from anon, authenticated;
 ## Implementation Steps
 
 Toolchain and local stack
-1. [ ] Pull and pin images: pick the latest stable tags of `golang` (≥ 1.24), `golangci/golangci-lint` (v2), `ghcr.io/cirruslabs/flutter` (stable), `supabase/postgres` (current 15.x or 17.x) and confirm each exists with `docker pull`. Record the tags in the Implementation Log.
-2. [ ] Append `.cache/` and `apps/api/bin/` to `.gitignore` (keep existing entries; Flutter ignores already exist).
-3. [ ] Create the root `Makefile` with the image variables, `GO_RUN`, `FLUTTER_RUN`, and targets `up`, `down`, `db-reset`, `run-api` from Architecture (gen/lint/test targets are added in steps 13 and 25).
-4. [ ] Create `compose.yaml` (`db` service with pinned image, `pgdata` volume, `pg_isready` healthcheck, port `54322:5432`; `api` service behind profile `app`, `build: ./apps/api`, env as in Architecture, port `8080:8080`, `depends_on` db healthy) and the root `.env.example` (`SUPABASE_JWKS_URL=` with comment).
-5. [ ] Create `db/local/00_auth_stub.sql` as in Architecture (header comment: local only, not a migration, never applied to a hosted project).
+1. [x] Pull and pin images: pick the latest stable tags of `golang` (≥ 1.24), `golangci/golangci-lint` (v2), `ghcr.io/cirruslabs/flutter` (stable), `supabase/postgres` (current 15.x or 17.x) and confirm each exists with `docker pull`. Record the tags in the Implementation Log.
+2. [x] Append `.cache/` and `apps/api/bin/` to `.gitignore` (keep existing entries; Flutter ignores already exist).
+3. [x] Create the root `Makefile` with the image variables, `GO_RUN`, `FLUTTER_RUN`, and targets `up`, `down`, `db-reset`, `run-api` from Architecture (gen/lint/test targets are added in steps 13 and 25).
+4. [x] Create `compose.yaml` (`db` service with pinned image, `pgdata` volume, `pg_isready` healthcheck, port `54322:5432`; `api` service behind profile `app`, `build: ./apps/api`, env as in Architecture, port `8080:8080`, `depends_on` db healthy) and the root `.env.example` (`SUPABASE_JWKS_URL=` with comment).
+5. [x] Create `db/local/00_auth_stub.sql` as in Architecture (header comment: local only, not a migration, never applied to a hosted project).
 
 Contract and migrations
-6. [ ] Create `contracts/openapi/openapi.yaml` exactly as in Architecture (3.0.3, `getHealth` with `security: []`, global `bearerAuth`, schemas `Health`, `ErrorCode`, `Error`, response `Unauthorized`).
-7. [ ] Create `db/migrations/0001_user_settings.sql` and `0002_products.sql` as in Architecture (`0002` includes `products_owner_barcode_live_key` and `products_owner_idx`).
-8. [ ] Create `db/migrations/0003_diary_entries.sql`, `0004_favorites.sql`, `0005_recents.sql` as in Architecture.
-9. [ ] Run `make db-reset`; fix SQL until all six files apply. If `supabase/postgres` needs other env vars, a different connect user, or the stub conflicts with the image's `auth` schema, adjust `compose.yaml`/the stub (never the migrations' meaning) and log the decision.
+6. [x] Create `contracts/openapi/openapi.yaml` exactly as in Architecture (3.0.3, `getHealth` with `security: []`, global `bearerAuth`, schemas `Health`, `ErrorCode`, `Error`, response `Unauthorized`).
+7. [x] Create `db/migrations/0001_user_settings.sql` and `0002_products.sql` as in Architecture (`0002` includes `products_owner_barcode_live_key` and `products_owner_idx`).
+8. [x] Create `db/migrations/0003_diary_entries.sql`, `0004_favorites.sql`, `0005_recents.sql` as in Architecture.
+9. [x] Run `make db-reset`; fix SQL until all six files apply. If `supabase/postgres` needs other env vars, a different connect user, or the stub conflicts with the image's `auth` schema, adjust `compose.yaml`/the stub (never the migrations' meaning) and log the decision.
 
 Go API
-10. [ ] Create `apps/api/go.mod` (`module example.com/lean-tracker/apps/api`, pinned `go` version) and add dependencies inside `GO_IMAGE`: `go get github.com/jackc/pgx/v5 github.com/golang-jwt/jwt/v5 github.com/MicahParks/keyfunc/v3 && go get -tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen && go mod tidy`. Keep `go.sum`.
-11. [ ] Create `apps/api/internal/gen/openapi/config.yaml` and `generate.go` as in Architecture; add target `gen-go` to the Makefile; run `make gen-go`; confirm `openapi.gen.go` has `StrictServerInterface`, `GetHealth200JSONResponse`, `GetHealth503JSONResponse`, `Error`, `UNAUTHORIZED`, `HandlerWithOptions`, `StdHTTPServerOptions`.
-12. [ ] Create `apps/api/internal/kernel/requestuser/requestuser.go` (`WithUserID`, `UserID`, unexported key type) and `requestuser_test.go` (round trip; empty context returns `false`).
-13. [ ] Add Makefile targets `lint-go`, `test-go`; create `apps/api/.golangci.yml` as in Architecture.
-14. [ ] Create `apps/api/internal/platform/config/config.go` and `config_test.go` (table-driven: all set → ok; missing `DATABASE_URL`; missing `SUPABASE_JWKS_URL`; JWKS URL not absolute http(s); `PORT` unset → `8080`; `PORT` `abc` or `70000` rejected; error text names the variable and never contains the value).
-15. [ ] Create `apps/api/internal/platform/database/database.go` with `Open` (`pgxpool.New` only). No unit test (needs a DB); covered by health with a fake pinger and the user's local run.
-16. [ ] Create `apps/api/internal/platform/jwtauth/jwttest/jwttest.go` (`NewIssuer(t)`: ES256 key, `kid` `test-1`, `httptest` JWKS server closed by `t.Cleanup`, signer for `jwt.MapClaims`).
-17. [ ] Create `apps/api/internal/platform/jwtauth/verifier.go` (`NewVerifier`, `Verify`, `ErrInvalidToken`) as in Architecture, and `verifier_test.go`: valid token → its `sub`; expired; missing `exp`; wrong `aud`; signed by another key; `alg=none`; HS256 token; missing `sub`; `sub` not a UUID; malformed string; `NewVerifier` with an unreachable URL returns no error and `Verify` then fails. Test names cite NFR-004 / PRD §14.
-18. [ ] Create `apps/api/internal/platform/jwtauth/middleware.go` (`TokenVerifier`, `Middleware`) and `middleware_test.go` with a fake verifier: public request passes without header; missing header → 401 JSON `{"code":"UNAUTHORIZED",...}` + `WWW-Authenticate: Bearer` and `next` not called; `Basic` scheme → 401; verifier error → 401; valid → `next` called and `requestuser.UserID` returns the `sub`.
-19. [ ] Create `apps/api/internal/platform/httpapi/health.go` (`Pinger`, `HealthServer`, `NewHealthServer`, `GetHealth` with 2 s timeout) and `health_test.go` (fake pinger ok → 200 `{"status":"ok"}`; error → 503 `{"status":"unavailable"}`; through the generated strict handler with `httptest`).
-20. [ ] Create `apps/api/internal/platform/httpapi/router.go` (`NewHandler`) and `router_test.go` using `jwttest` and a real `Verifier`: `GET /v1/health` no token → 200; `POST /v1/health` no token → 401; `GET /v1/unknown` and `GET /` no token → 401; `GET /v1/unknown` valid token → 404; expired token → 401.
-21. [ ] Create `apps/api/cmd/api/main.go` (`main`, `run(ctx, getenv)`) as in Architecture.
-22. [ ] Create `apps/api/Dockerfile`, `apps/api/.dockerignore`, `apps/api/.env.example` as in Architecture; settle the compose `api` healthcheck question (drop it or add a check flag) and log the choice.
-23. [ ] Run `make lint-go` and `make test-go`; fix until clean.
+10. [x] Create `apps/api/go.mod` (`module example.com/lean-tracker/apps/api`, pinned `go` version) and add dependencies inside `GO_IMAGE`: `go get github.com/jackc/pgx/v5 github.com/golang-jwt/jwt/v5 github.com/MicahParks/keyfunc/v3 && go get -tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen && go mod tidy`. Keep `go.sum`.
+11. [x] Create `apps/api/internal/gen/openapi/config.yaml` and `generate.go` as in Architecture; add target `gen-go` to the Makefile; run `make gen-go`; confirm `openapi.gen.go` has `StrictServerInterface`, `GetHealth200JSONResponse`, `GetHealth503JSONResponse`, `Error`, `UNAUTHORIZED`, `HandlerWithOptions`, `StdHTTPServerOptions`.
+12. [x] Create `apps/api/internal/kernel/requestuser/requestuser.go` (`WithUserID`, `UserID`, unexported key type) and `requestuser_test.go` (round trip; empty context returns `false`).
+13. [x] Add Makefile targets `lint-go`, `test-go`; create `apps/api/.golangci.yml` as in Architecture.
+14. [x] Create `apps/api/internal/platform/config/config.go` and `config_test.go` (table-driven: all set → ok; missing `DATABASE_URL`; missing `SUPABASE_JWKS_URL`; JWKS URL not absolute http(s); `PORT` unset → `8080`; `PORT` `abc` or `70000` rejected; error text names the variable and never contains the value).
+15. [x] Create `apps/api/internal/platform/database/database.go` with `Open` (`pgxpool.New` only). No unit test (needs a DB); covered by health with a fake pinger and the user's local run.
+16. [x] Create `apps/api/internal/platform/jwtauth/jwttest/jwttest.go` (`NewIssuer(t)`: ES256 key, `kid` `test-1`, `httptest` JWKS server closed by `t.Cleanup`, signer for `jwt.MapClaims`).
+17. [x] Create `apps/api/internal/platform/jwtauth/verifier.go` (`NewVerifier`, `Verify`, `ErrInvalidToken`) as in Architecture, and `verifier_test.go`: valid token → its `sub`; expired; missing `exp`; wrong `aud`; signed by another key; `alg=none`; HS256 token; missing `sub`; `sub` not a UUID; malformed string; `NewVerifier` with an unreachable URL returns no error and `Verify` then fails. Test names cite NFR-004 / PRD §14.
+18. [x] Create `apps/api/internal/platform/jwtauth/middleware.go` (`TokenVerifier`, `Middleware`) and `middleware_test.go` with a fake verifier: public request passes without header; missing header → 401 JSON `{"code":"UNAUTHORIZED",...}` + `WWW-Authenticate: Bearer` and `next` not called; `Basic` scheme → 401; verifier error → 401; valid → `next` called and `requestuser.UserID` returns the `sub`.
+19. [x] Create `apps/api/internal/platform/httpapi/health.go` (`Pinger`, `HealthServer`, `NewHealthServer`, `GetHealth` with 2 s timeout) and `health_test.go` (fake pinger ok → 200 `{"status":"ok"}`; error → 503 `{"status":"unavailable"}`; through the generated strict handler with `httptest`).
+20. [x] Create `apps/api/internal/platform/httpapi/router.go` (`NewHandler`) and `router_test.go` using `jwttest` and a real `Verifier`: `GET /v1/health` no token → 200; `POST /v1/health` no token → 401; `GET /v1/unknown` and `GET /` no token → 401; `GET /v1/unknown` valid token → 404; expired token → 401.
+21. [x] Create `apps/api/cmd/api/main.go` (`main`, `run(ctx, getenv)`) as in Architecture.
+22. [x] Create `apps/api/Dockerfile`, `apps/api/.dockerignore`, `apps/api/.env.example` as in Architecture; settle the compose `api` healthcheck question (drop it or add a check flag) and log the choice.
+23. [x] Run `make lint-go` and `make test-go`; fix until clean.
 
 Flutter
-24. [ ] Run `flutter create --empty --platforms=android,ios --org io.github.example --project-name lean_tracker apps/mobile` in `FLUTTER_IMAGE` (`-w /work`, then `chown` to the host user). Set Android `applicationId`/`namespace` `io.github.example.leantracker` and `minSdk = 29`; iOS `PRODUCT_BUNDLE_IDENTIFIER` `io.github.example.leantracker` and deployment target `16.0`. Delete any generated `test/widget_test.dart`.
-25. [ ] Add Makefile targets `gen-dart`, `lint-dart`, `test-dart` and aggregate targets `gen`, `lint`, `test`.
-26. [ ] Add dependencies with `flutter pub add` (runtime and dev lists in Architecture), add the `swagger_parser` config, and create `apps/mobile/analysis_options.yaml` as in Architecture.
-27. [ ] Replace `apps/mobile/lib/main.dart`; create `apps/mobile/lib/app/app.dart` (`LeanTrackerApp`) and `apps/mobile/lib/app/router.dart` (`routerProvider`) as in Architecture.
-28. [ ] Run `make gen-dart`; confirm `apps/mobile/lib/gen/` holds a `Health` model (status enum) and a retrofit client for `getHealth`. Never edit `lib/gen/`.
-29. [ ] Create `apps/mobile/test/app/app_test.dart` (pump `ProviderScope(child: LeanTrackerApp())`, expect one `Scaffold`, no exception) and `apps/mobile/test/gen/health_test.dart` (`fromJson({'status': 'ok'})` → ok status; `toJson` round trip; use the names the generator emitted).
-30. [ ] Run `make lint-dart` and `make test-dart`; fix until clean.
+24. [x] Run `flutter create --empty --platforms=android,ios --org io.github.example --project-name lean_tracker apps/mobile` in `FLUTTER_IMAGE` (`-w /work`, then `chown` to the host user). Set Android `applicationId`/`namespace` `io.github.example.leantracker` and `minSdk = 29`; iOS `PRODUCT_BUNDLE_IDENTIFIER` `io.github.example.leantracker` and deployment target `16.0`. Delete any generated `test/widget_test.dart`.
+25. [x] Add Makefile targets `gen-dart`, `lint-dart`, `test-dart` and aggregate targets `gen`, `lint`, `test`.
+26. [x] Add dependencies with `flutter pub add` (runtime and dev lists in Architecture), add the `swagger_parser` config, and create `apps/mobile/analysis_options.yaml` as in Architecture.
+27. [x] Replace `apps/mobile/lib/main.dart`; create `apps/mobile/lib/app/app.dart` (`LeanTrackerApp`) and `apps/mobile/lib/app/router.dart` (`routerProvider`) as in Architecture.
+28. [x] Run `make gen-dart`; confirm `apps/mobile/lib/gen/` holds a `Health` model (status enum) and a retrofit client for `getHealth`. Never edit `lib/gen/`.
+29. [x] Create `apps/mobile/test/app/app_test.dart` (pump `ProviderScope(child: LeanTrackerApp())`, expect one `Scaffold`, no exception) and `apps/mobile/test/gen/health_test.dart` (`fromJson({'status': 'ok'})` → ok status; `toJson` round trip; use the names the generator emitted).
+30. [x] Run `make lint-dart` and `make test-dart`; fix until clean.
 
 Docs and final verification
-31. [ ] Update `docs/PRD.md`: §14 Data access — the Go API connects as the Supabase `postgres` role; RLS on with no policies for `anon`/`authenticated` blocks Supabase REST; isolation relies on every query filtering by `user_id` from the JWT. §18 Tech stack table — add `flutter_riverpod`, `go_router`, `swagger_parser` (dio/retrofit) client, `oapi-codegen` std-http strict server, `pgx`, `golang-jwt` + `keyfunc`, and "local: Docker Compose (`supabase/postgres`) and Docker-run toolchain via root `Makefile`". §19 M1 Includes — "repository structure from 18.1; modules are created by the milestone that first uses them". §20 — add D-62 (`postgres` role instead of a dedicated role), D-63 (Riverpod providers in `app/` + go_router), D-64 (oapi-codegen strict std-http server in `apps/api/internal/gen/openapi`; swagger_parser Dart client in `lib/gen/`; generated code committed), D-65 (golang-jwt v5 + keyfunc v3; ES256/RS256; JWKS fetched lazily), D-66 (toolchain in pinned Docker images; local stack compose Postgres only, no local Auth; migrations verified by apply), D-67 (error body `{code, message}`; health returns `Health` with `ok|unavailable`), D-68 (no empty module skeletons; partial unique indexes on live rows for products barcode and favorites). Bump the version line to 1.1 with today's date.
-32. [ ] Update `docs/ARCHITECTURE.md`: §Layout — add root `Makefile`, `compose.yaml`, `db/local/` (local auth stub), `apps/api/internal/gen/openapi/` (generated server, never edited); §Decisions — AD7 (generated Go server lives in `internal/gen/openapi` so module `transport` can implement it without importing `platform/`), AD8 (request user id travels in `context` through `kernel/requestuser`), AD9 (Riverpod providers declared in `app/`, routing with go_router); §Open items — remove items 1 and 2 (resolved), keep item 3 renumbered as 1. Update `docs/CODE_QUALITY.md` single-sources table: "Tool versions | root `Makefile` image variables (`Dockerfile`, `go.mod` follow)" and "Generated clients and server stubs | `make gen` from the contract".
-33. [ ] Final light verification: `make lint` and `make test` green; `make db-reset` green; `grep -rn "go-arch-lint\|make arch" docs .claude/skills CLAUDE.md` prints nothing.
+31. [x] Update `docs/PRD.md`: §14 Data access — the Go API connects as the Supabase `postgres` role; RLS on with no policies for `anon`/`authenticated` blocks Supabase REST; isolation relies on every query filtering by `user_id` from the JWT. §18 Tech stack table — add `flutter_riverpod`, `go_router`, `swagger_parser` (dio/retrofit) client, `oapi-codegen` std-http strict server, `pgx`, `golang-jwt` + `keyfunc`, and "local: Docker Compose (`supabase/postgres`) and Docker-run toolchain via root `Makefile`". §19 M1 Includes — "repository structure from 18.1; modules are created by the milestone that first uses them". §20 — add D-62 (`postgres` role instead of a dedicated role), D-63 (Riverpod providers in `app/` + go_router), D-64 (oapi-codegen strict std-http server in `apps/api/internal/gen/openapi`; swagger_parser Dart client in `lib/gen/`; generated code committed), D-65 (golang-jwt v5 + keyfunc v3; ES256/RS256; JWKS fetched lazily), D-66 (toolchain in pinned Docker images; local stack compose Postgres only, no local Auth; migrations verified by apply), D-67 (error body `{code, message}`; health returns `Health` with `ok|unavailable`), D-68 (no empty module skeletons; partial unique indexes on live rows for products barcode and favorites). Bump the version line to 1.1 with today's date.
+32. [x] Update `docs/ARCHITECTURE.md`: §Layout — add root `Makefile`, `compose.yaml`, `db/local/` (local auth stub), `apps/api/internal/gen/openapi/` (generated server, never edited); §Decisions — AD7 (generated Go server lives in `internal/gen/openapi` so module `transport` can implement it without importing `platform/`), AD8 (request user id travels in `context` through `kernel/requestuser`), AD9 (Riverpod providers declared in `app/`, routing with go_router); §Open items — remove items 1 and 2 (resolved), keep item 3 renumbered as 1. Update `docs/CODE_QUALITY.md` single-sources table: "Tool versions | root `Makefile` image variables (`Dockerfile`, `go.mod` follow)" and "Generated clients and server stubs | `make gen` from the contract".
+33. [x] Final light verification: `make lint` and `make test` green; `make db-reset` green; `grep -rn "go-arch-lint\|make arch" docs .claude/skills CLAUDE.md` prints nothing.
 
 ## Checkpoints (Todo List)
-- [ ] CP1 — Local stack, contract and schema: steps 1-9; `make db-reset` exits 0 (stub + `0001`–`0005` apply to an empty container)
-- [ ] CP2 — Go generation, config and JWT: steps 10-18; `make test-go` green incl. `requestuser_test.go`, `config_test.go`, `verifier_test.go`, `middleware_test.go`
-- [ ] CP3 — Go health, router and binary: steps 19-23; `make lint-go` and `make test-go` green incl. `health_test.go`, `router_test.go`
-- [ ] CP4 — Flutter shell and generated client: steps 24-30; `make lint-dart` and `make test-dart` green incl. `test/app/app_test.dart`, `test/gen/health_test.dart`
-- [ ] CP5 — Docs + final light verification: steps 31-33; `make lint`, `make test`, `make db-reset` green; grep clean
+- [x] CP1 — Local stack, contract and schema: steps 1-9; `make db-reset` exits 0 (stub + `0001`–`0005` apply to an empty container) — make db-reset exit 0, 5 tables with RLS on
+- [x] CP2 — Go generation, config and JWT: steps 10-18; `make test-go` green incl. `requestuser_test.go`, `config_test.go`, `verifier_test.go`, `middleware_test.go` — files written; make test-go not run (not selected)
+- [x] CP3 — Go health, router and binary: steps 19-23; `make lint-go` and `make test-go` green incl. `health_test.go`, `router_test.go` — make lint-go / test-go not run (not selected)
+- [x] CP4 — Flutter shell and generated client: steps 24-30; `make lint-dart` and `make test-dart` green incl. `test/app/app_test.dart`, `test/gen/health_test.dart` — make lint-dart / test-dart not run (not selected); make gen-dart ran ok
+- [x] CP5 — Docs + final light verification: steps 31-33; `make lint`, `make test`, `make db-reset` green; grep clean — make db-reset green, grep clean; make lint / make test not run (not selected)
 
 ### Risks & Mitigations
 - Risk: `supabase/postgres` behaves differently from a plain Postgres image (required env vars, `postgres` not superuser, its own `auth` schema clashing with the stub), so `make db-reset` fails for reasons unrelated to the migrations.
@@ -523,3 +523,77 @@ Note: Estimates are rough. Adjust based on your velocity.
 - Decision: Health 503 body: `Health` schema, `status` enum `ok|unavailable`
 - Decision: Mobile extras (l10n, portrait lock): neither in M1
 - Decision: Migration verification: apply-only (`make db-reset`), no schema assertion test
+- Decision: workspace: worktree
+- Decision: checks: none (user selected no lint/unit-test checks; plan steps that run make db-reset and generators still run as plan actions)
+- Base: main @ 8f0d00a, worktree .claude/worktrees/01-repo-api-skeleton on feature/01-repo-api-skeleton; main checkout clean at start
+- Step 1 — started
+- Step 1 — done — files: (none; images pulled) — pinned golang:1.27.4-bookworm, golangci/golangci-lint:v2.15.0 (built with go1.27.0, so go.mod must say go 1.27.0 not 1.27.4), ghcr.io/cirruslabs/flutter:3.44.0 (Dart 3.12.0), supabase/postgres:17.12.0.005, gcr.io/distroless/static-debian12:nonroot
+- Step 2 — started
+- Step 2 — done — files: .gitignore — appended .cache/ (apps/api/bin/ already present)
+- Step 3 — started
+- Step 3 — done — files: Makefile — image vars, GO_RUN, FLUTTER_RUN/FIX, up/down/db-reset/run-api (recipes in tab form)
+- Step 4 — started
+- Step 4 — done — files: compose.yaml, .env.example — db + api(profile app); api healthcheck deferred to step 22
+- Step 5 — started
+- Step 5 — done — files: db/local/00_auth_stub.sql — as in plan
+- Step 6 — started
+- Step 6 — done — files: contracts/openapi/openapi.yaml — as in plan
+- Step 7 — started
+- Step 7 — done — files: db/migrations/0001_user_settings.sql, db/migrations/0002_products.sql — as in plan; SQL comment cites D-68
+- Step 8 — started
+- Step 8 — done — files: db/migrations/0003_diary_entries.sql, db/migrations/0004_favorites.sql, db/migrations/0005_recents.sql — as in plan
+- Step 9 — started
+- Step 9 — done — files: db/local/00_auth_stub.sql — make db-reset exit 0 (stub + 0001-0005, RLS on for all five). Decision: supabase/postgres already ships auth.users/anon/authenticated and the postgres role cannot create in schema auth, so stub now creates auth.users only when to_regclass('auth.users') is null
+- Decision: db-reset connects as postgres; works against supabase/postgres:17.12.0.005 with FK to image's auth.users
+- Step 10 — started
+- Step 10 — done — files: apps/api/go.mod, apps/api/go.sum — go 1.27.0 (not 1.27.4: golangci v2.15.0 is built with go1.27.0); pgx v5.13.0, jwt v5.3.1, keyfunc v3.9.2, tool oapi-codegen v2.9.0. go mod tidy runs again once code imports pgx/jwt/keyfunc (it drops unused requires)
+- Step 11 — started
+- Step 11 — done — files: apps/api/internal/gen/openapi/config.yaml, generate.go, openapi.gen.go, Makefile — gen-go target added. Deviation: config adds output-options.skip-prune (else Error/ErrorCode unused by any route are pruned) and compatibility.always-prefix-enum-values; constants are ErrorCodeUNAUTHORIZED, HealthStatusOk/HealthStatusUnavailable (not UNAUTHORIZED). Generated code imports github.com/oapi-codegen/runtime (go mod tidy later)
+- Step 12 — started
+- Step 12 — done — files: apps/api/internal/kernel/requestuser/requestuser.go, requestuser_test.go — WithUserID/UserID; empty id counts as no user; 3 tests
+- Step 13 — started
+- Step 13 — done — files: Makefile, apps/api/.golangci.yml — lint-go, test-go targets; golangci config as in plan
+- Step 14 — started
+- Step 14 — done — files: apps/api/internal/platform/config/config.go, config_test.go — table-driven; all problems joined in one error, no values echoed
+- Step 15 — started
+- Step 15 — done — files: apps/api/internal/platform/database/database.go — pgxpool.New only; error message fixed so the DSN is never echoed; no unit test (needs a DB)
+- Step 16 — started
+- Step 16 — done — files: apps/api/internal/platform/jwtauth/jwttest/jwttest.go — NewIssuer(t) as in plan; exports KeyID
+- Step 17 — started
+- Step 17 — done — files: apps/api/internal/platform/jwtauth/verifier.go, verifier_test.go — keyfunc.NewDefaultOverrideCtx (not NewDefaultCtx): 5 s HTTPTimeout bounds the first fetch, warn-level slog on refresh error; first fetch runs inside NewVerifier but its failure is swallowed, retried on unknown kid; 13 test cases
+- Step 18 — started
+- Step 18 — done — files: apps/api/internal/platform/jwtauth/middleware.go, middleware_test.go — 401 body from openapi.Error / ErrorCodeUNAUTHORIZED; bearer scheme case-insensitive; fake verifier tests
+- Decision: checks stay none — the confirming question went unanswered; code from steps 12-22 is therefore uncompiled and untested until the user runs make lint / make test (or lean-review does)
+- Step 19 — started
+- Step 19 — done — files: apps/api/internal/platform/httpapi/health.go, health_test.go — 2 s ping timeout; fake pinger tests through the generated strict handler
+- Step 20 — started
+- Step 20 — done — files: apps/api/internal/platform/httpapi/router.go, router_test.go — NewHandler as in plan; real Verifier + jwttest
+- Step 21 — started
+- Step 21 — done — files: apps/api/cmd/api/main.go — run(getenv) (ctx made inside via signal.NotifyContext; plan's run(ctx, getenv) signature simplified); JSON slog; graceful shutdown 10 s
+- Step 22 — started
+- Step 22 — done — files: apps/api/Dockerfile, apps/api/.dockerignore, apps/api/.env.example — Decision: compose api service keeps no healthcheck (distroless has no shell/curl); --wait waits for 'running'
+- go mod tidy run after step 22 (pgx, jwt, keyfunc, oapi-codegen/runtime now direct requires)
+- Step 23 — started
+- Step 23 — done — files: (none) — make lint-go / make test-go NOT run: user selected no checks (Phase 0b). Targets exist in Makefile; run them before merge
+- Step 24 — started
+- Step 24 — done — files: apps/mobile/** (flutter create --empty), android/app/build.gradle.kts, android/.../MainActivity.kt (moved to .../leantracker/), ios/Runner.xcodeproj/project.pbxproj — applicationId/namespace/bundle id io.github.example.leantracker, minSdk 29, iOS target 16.0; no test/widget_test.dart was generated (--empty); no Podfile exists in the empty template; app label stays 'lean_tracker' (out of plan scope); Flutter 3.44.0 / Dart 3.12.0
+- Step 25 — started
+- Step 25 — done — files: Makefile — gen-dart, lint-dart, test-dart and aggregates gen, lint, test added
+- Step 26 — started
+- Step 26 — done — files: apps/mobile/pubspec.yaml, pubspec.lock, analysis_options.yaml — flutter_riverpod ^3.5.0, go_router ^18.1.4, dio ^5.11.1, retrofit ^4.10.0, json_annotation ^4.12.0; dev build_runner ^2.15.1, swagger_parser ^1.46.0 (2.x not resolvable with retrofit_generator 10.3.3), retrofit_generator ^10.3.3, json_serializable ^6.15.2; swagger_parser config inside pubspec.yaml
+- Step 27 — started
+- Step 27 — done — files: apps/mobile/lib/main.dart, lib/app/app.dart, lib/app/router.dart — as in plan
+- Step 28 — started
+- Step 28 — done — files: apps/mobile/lib/gen/** (generated) — make gen-dart ok (swagger_parser 1.46 + build_runner); models Health, HealthStatus {ok, unavailable, $unknown}, Error, ErrorCode; FallbackClient.getHealth() under RestClient.fallback; build_runner warns --delete-conflicting-outputs is ignored in this version (flag kept in Makefile, harmless)
+- Step 29 — started
+- Step 29 — done — files: apps/mobile/test/app/app_test.dart, apps/mobile/test/gen/health_test.dart — shell build test; Health fromJson/round trip/unknown status. (generated toJson maps ok/unavailable to strings, checked in health.g.dart)
+- Step 30 — started
+- Step 30 — done — files: (none) — make lint-dart / make test-dart NOT run: user selected no checks (Phase 0b). Run before merge; Dart tests are unverified until then
+- Step 31 — started
+- Step 31 — done — files: docs/PRD.md — §14 role, §18 stack + local toolchain row, §19 M1 wording, D-62..D-68, version 1.1 / 2026-11-27
+- Step 32 — started
+- Step 32 — done — files: docs/ARCHITECTURE.md, docs/CODE_QUALITY.md — Layout (Makefile, compose.yaml, db/local, internal/gen/openapi, requestuser), AD7-AD9, open items 1-2 removed (3 renumbered 1), two single-sources rows
+- Step 33 — started
+- Step 33 — done — files: .claude/skills/lean-security/SKILL.md — make db-reset exit 0 (re-run, stack then torn down); grep for go-arch-lint / make arch was not clean: one leftover 'make arch' in lean-security SKILL.md removed, now clean. make lint / make test NOT run (not selected)
+- Handoff — mode: worktree — branch: feature/01-repo-api-skeleton — base: 8f0d00a — checks: none — changed: .gitignore, Makefile, compose.yaml, .env.example, db/local/00_auth_stub.sql, db/migrations/0001..0005, contracts/openapi/openapi.yaml, apps/api/** (go.mod, go.sum, .golangci.yml, Dockerfile, .dockerignore, .env.example, cmd/api, internal/gen/openapi, internal/kernel/requestuser, internal/platform/{config,database,jwtauth,httpapi}), apps/mobile/** (flutter create + pubspec, analysis_options, lib/main.dart, lib/app, lib/gen, test/app, test/gen), docs/PRD.md, docs/ARCHITECTURE.md, docs/CODE_QUALITY.md, .claude/skills/lean-security/SKILL.md, specs/01-repo-api-skeleton.md — preexisting: none — checkpoints: 5/5
+- Post-handoff check run (user request): make lint first failed (gosec G101 on test DSN, 3x noctx on httptest.NewRequest, dart format on router.dart and app_test.dart); fixed in test files and by dart format; then make lint 0 issues + analyze clean, make test green (Go 5 packages ok, Dart 4 tests)

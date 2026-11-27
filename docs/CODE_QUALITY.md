@@ -50,6 +50,8 @@ Rules the code is written and reviewed against. Product: [PRD](PRD.md). Structur
 | Theme and design tokens | `apps/mobile/lib/ui/` |
 | Database schema | `db/migrations/` (server), Drift tables in `infrastructure/` (device) |
 | Configuration names | the API config validation and `*.example` env files |
+| Tool versions | root `Makefile` image variables (`apps/api/Dockerfile` and `go.mod` follow them) |
+| Generated clients and server stubs | `make gen` from the contract |
 
 ## Working agreements
 
