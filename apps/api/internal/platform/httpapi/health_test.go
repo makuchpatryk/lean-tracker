@@ -22,7 +22,7 @@ func getHealth(t *testing.T, db httpapi.Pinger) *httptest.ResponseRecorder {
 	mux := http.NewServeMux()
 	openapi.HandlerWithOptions(openapi.NewStrictHandler(httpapi.NewHealthServer(db), nil), openapi.StdHTTPServerOptions{BaseRouter: mux})
 	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/v1/health", nil))
+	mux.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/v1/health", nil))
 	return rec
 }
 

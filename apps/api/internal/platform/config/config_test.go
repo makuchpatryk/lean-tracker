@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	dsn     = "postgres://user:s3cret@localhost:5432/db"
+	dsn     = "postgres://localhost:5432/db"
 	jwksURL = "https://example.supabase.co/auth/v1/.well-known/jwks.json"
 )
 

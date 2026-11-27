@@ -56,7 +56,7 @@ func assertUnauthorized(t *testing.T, rec *httptest.ResponseRecorder, nextCalled
 func TestMiddlewarePublicRequestPassesWithoutHeader(t *testing.T) { // NFR-004: health check is public
 	v := &fakeVerifier{}
 
-	rec, nextCalled, _ := serve(t, v, httptest.NewRequest(http.MethodGet, "/public", nil))
+	rec, nextCalled, _ := serve(t, v, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/public", nil))
 
 	if rec.Code != http.StatusNoContent || !nextCalled || v.called {
 		t.Fatalf("status %d, next called %v, verifier called %v; want 204, true, false", rec.Code, nextCalled, v.called)
@@ -78,7 +78,7 @@ func TestMiddlewareRejectsRequestsWithoutAValidBearerToken(t *testing.T) { // NF
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(tt.method, tt.path, nil)
+			req := httptest.NewRequestWithContext(t.Context(), tt.method, tt.path, nil)
 			if tt.header != "" {
 				req.Header.Set("Authorization", tt.header)
 			}
@@ -91,7 +91,7 @@ func TestMiddlewareRejectsRequestsWithoutAValidBearerToken(t *testing.T) { // NF
 }
 
 func TestMiddlewareValidTokenCallsNextWithUserID(t *testing.T) { // PRD §14: user_id comes from sub
-	req := httptest.NewRequest(http.MethodGet, "/private", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/private", nil)
 	req.Header.Set("Authorization", "bearer good") // scheme is case-insensitive (RFC 7235)
 
 	rec, nextCalled, gotUser := serve(t, &fakeVerifier{validToken: "good"}, req)
