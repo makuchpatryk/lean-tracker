@@ -20,13 +20,14 @@ make up          # start local Postgres, Supabase Auth, the Auth gateway and Mai
 make auth-keys   # create the local Auth signing key (also run by make up)
 make db-reset    # drop local data, apply auth stub and migrations, restart the Auth stack
 make run-api     # build and run the API in Docker (port 8080)
-make lint        # contract check, Go lint, Dart format and analyze
+make lint        # Go lint, Dart format and analyze
+make check-contract  # fail if apps/mobile/openapi.yaml differs from the API's
 make test        # Go and Flutter unit tests
 make gen         # regenerate API clients and server code
 make sync-contract   # copy apps/api/openapi.yaml to apps/mobile/openapi.yaml
 ```
 
-`make check-contract` (run by `make lint`) fails if the mobile copy of the contract differs from the API's. After changing the contract, run `make sync-contract`, then `make gen`.
+`make check-contract` (its own CI job) fails if the mobile copy of the contract differs from the API's. After changing the contract, run `make sync-contract`, then `make gen`.
 
 ## Configuration
 

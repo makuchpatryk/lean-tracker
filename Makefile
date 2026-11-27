@@ -16,7 +16,7 @@ FLUTTER_FIX = ; status=$$?; chown -R $(UID_GID) /work/apps/mobile /work/.cache/p
 .PHONY: gen gen-go gen-dart lint lint-go lint-dart test test-go test-dart auth-keys up down db-reset run-api sync-contract check-contract
 
 gen: gen-go gen-dart
-lint: check-contract lint-go lint-dart
+lint: lint-go lint-dart
 test: test-go test-dart
 
 # The API owns the contract; the mobile app keeps a committed copy (D-70).
