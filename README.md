@@ -31,7 +31,7 @@ make sync-contract   # copy apps/api/openapi.yaml to apps/mobile/openapi.yaml
 
 ## Configuration
 
-- API: copy `apps/api/.env.example` and `.env.example` (root, used by `compose.yaml`) and fill `SUPABASE_JWKS_URL`. Leaving it empty starts the API, which then rejects every token.
+- API: copy `.env.example` (root) to `.env` and fill `SUPABASE_JWKS_URL`. Running the API on the host also needs `PORT` and `DATABASE_URL` from the same file. Leaving it empty starts the API, which then rejects every token.
 - Mobile: copy `apps/mobile/env/example.json` to `apps/mobile/env/local.json` (git-ignored) and fill `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `API_BASE_URL`; run with `flutter run --dart-define-from-file=env/local.json`. Nothing secret goes in the repo.
 
 ## Local sign-in stack
