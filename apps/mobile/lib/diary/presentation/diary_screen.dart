@@ -73,7 +73,11 @@ class DiaryScreen extends ConsumerWidget {
                     child: Text(
                       dateText,
                       textAlign: TextAlign.center,
-                      style: nunito(20, AppWeights.extraBold, color: palette.ink),
+                      style: nunito(
+                        20,
+                        AppWeights.extraBold,
+                        color: palette.ink,
+                      ),
                     ),
                   ),
                 ),

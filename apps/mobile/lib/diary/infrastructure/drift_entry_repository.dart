@@ -33,9 +33,7 @@ class DriftEntryRepository implements EntryRepository {
         (t) => OrderingTerm.asc(t.id),
       ]);
     return query.watch().map(
-      (rows) => [
-        for (final row in rows) ?_toEntry(row),
-      ],
+      (rows) => [for (final row in rows) ?_toEntry(row)],
     );
   }
 

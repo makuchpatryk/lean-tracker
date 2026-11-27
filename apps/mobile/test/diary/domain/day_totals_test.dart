@@ -5,17 +5,20 @@ import 'package:lean_tracker/diary/domain/meal.dart';
 import '../../support/diary_samples.dart';
 
 void main() {
-  test('300 + 200 kcal against a 2000 goal: consumed 500, remaining 1500 (FR-003)', () {
-    final totals = DayTotals.of([
-      entryOf(id: 'a', quantity: 150), // 300 kcal
-      entryOf(id: 'b', meal: Meal.lunch, quantity: 100), // 200 kcal
-    ], 2000);
+  test(
+    '300 + 200 kcal against a 2000 goal: consumed 500, remaining 1500 (FR-003)',
+    () {
+      final totals = DayTotals.of([
+        entryOf(id: 'a', quantity: 150), // 300 kcal
+        entryOf(id: 'b', meal: Meal.lunch, quantity: 100), // 200 kcal
+      ], 2000);
 
-    expect(totals.total.kcal, 500);
-    expect(totals.remainingKcal, 1500);
-    expect(totals.perMeal[Meal.breakfast]?.kcal, 300);
-    expect(totals.perMeal[Meal.lunch]?.kcal, 200);
-  });
+      expect(totals.total.kcal, 500);
+      expect(totals.remainingKcal, 1500);
+      expect(totals.perMeal[Meal.breakfast]?.kcal, 300);
+      expect(totals.perMeal[Meal.lunch]?.kcal, 200);
+    },
+  );
 
   test('a day over the goal has a negative remaining value (FR-003)', () {
     final totals = DayTotals.of([entryOf(quantity: 1500)], 2000); // 3000 kcal

@@ -19,24 +19,27 @@ void main() {
     await repository.save(entryOf(snapshot: servingProduct));
   });
 
-  test('only quantity, unit, meal and date change; the snapshot stays (BR-007)', () async {
-    final result = await editEntry(
-      id: 'e1',
-      quantityText: '2',
-      unit: EntryUnit.serving,
-      meal: Meal.dinner,
-      date: const LocalDate(2026, 11, 26),
-    );
+  test(
+    'only quantity, unit, meal and date change; the snapshot stays (BR-007)',
+    () async {
+      final result = await editEntry(
+        id: 'e1',
+        quantityText: '2',
+        unit: EntryUnit.serving,
+        meal: Meal.dinner,
+        date: const LocalDate(2026, 11, 26),
+      );
 
-    final entry = (result as EntryEdited).entry;
-    expect(entry.quantity, 2);
-    expect(entry.unit, EntryUnit.serving);
-    expect(entry.meal, Meal.dinner);
-    expect(entry.entryDate, const LocalDate(2026, 11, 26));
-    expect(entry.snapshot, servingProduct);
-    expect(entry.updatedAt, clock.current);
-    expect(repository.stored.single.quantity, 2);
-  });
+      final entry = (result as EntryEdited).entry;
+      expect(entry.quantity, 2);
+      expect(entry.unit, EntryUnit.serving);
+      expect(entry.meal, Meal.dinner);
+      expect(entry.entryDate, const LocalDate(2026, 11, 26));
+      expect(entry.snapshot, servingProduct);
+      expect(entry.updatedAt, clock.current);
+      expect(repository.stored.single.quantity, 2);
+    },
+  );
 
   test('an unknown id is EditEntryNotFound', () async {
     final result = await editEntry(

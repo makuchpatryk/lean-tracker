@@ -61,7 +61,11 @@ class DaySummaryCard extends StatelessWidget {
                   ),
                   Text(
                     l10n.diaryKcalLeft,
-                    style: nunito(15, AppWeights.semiBold, color: palette.muted),
+                    style: nunito(
+                      15,
+                      AppWeights.semiBold,
+                      color: palette.muted,
+                    ),
                   ),
                 ],
               ),

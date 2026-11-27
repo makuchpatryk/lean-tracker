@@ -15,7 +15,8 @@ final class DayTotals {
   factory DayTotals.of(List<DiaryEntry> entries, int goalKcal) {
     final perMeal = {for (final meal in Meal.values) meal: Nutrition.zero};
     for (final entry in entries) {
-      perMeal[entry.meal] = (perMeal[entry.meal] ?? Nutrition.zero) + entry.nutrition;
+      perMeal[entry.meal] =
+          (perMeal[entry.meal] ?? Nutrition.zero) + entry.nutrition;
     }
     final total = perMeal.values.fold(Nutrition.zero, (sum, n) => sum + n);
     return DayTotals(

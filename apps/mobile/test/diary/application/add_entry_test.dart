@@ -29,13 +29,16 @@ void main() {
     date: day,
   );
 
-  test('150 g of a 200 kcal product saves an entry of 300 kcal (FR-004)', () async {
-    final result = await add();
+  test(
+    '150 g of a 200 kcal product saves an entry of 300 kcal (FR-004)',
+    () async {
+      final result = await add();
 
-    final entry = (result as EntryAdded).entry;
-    expect(entry.nutrition.kcal, 300);
-    expect(repository.stored, hasLength(1));
-  });
+      final entry = (result as EntryAdded).entry;
+      expect(entry.nutrition.kcal, 300);
+      expect(repository.stored, hasLength(1));
+    },
+  );
 
   test('the id comes from Uuid and updatedAt from Clock in UTC', () async {
     final entry = ((await add()) as EntryAdded).entry;

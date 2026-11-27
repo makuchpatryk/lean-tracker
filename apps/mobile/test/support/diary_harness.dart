@@ -13,7 +13,8 @@ import 'fakes.dart';
 const testGoals = DailyGoals(kcal: 2000, protein: 150, fat: 70, carbs: 240);
 
 /// Pumps [screen] pushed on top of a base page (so a screen that pops itself has somewhere to go),
-/// with the diary providers backed by fakes. The clock stands at 2026-11-25. The view is 360 dp wide.
+/// with the diary providers backed by fakes. The clock stands at 2026-11-25. The view is 360 dp wide and
+/// tall enough (1400 dp) that a ListView builds every card and button.
 Future<FakeEntryRepository> pumpDiaryScreen(
   WidgetTester tester,
   Widget screen, {
@@ -24,7 +25,7 @@ Future<FakeEntryRepository> pumpDiaryScreen(
   DailyGoals? goals = testGoals,
 }) async {
   tester.view
-    ..physicalSize = const Size(1080, 2400)
+    ..physicalSize = const Size(1080, 4200)
     ..devicePixelRatio = 3;
   addTearDown(tester.view.reset);
   final entries = repository ?? FakeEntryRepository();
@@ -44,12 +45,13 @@ Future<FakeEntryRepository> pumpDiaryScreen(
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: const [Locale('en'), Locale('pl')],
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.linear(textScale),
-          ),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
           child: child ?? const SizedBox.shrink(),
         ),
         home: const Scaffold(body: Text('base page')),

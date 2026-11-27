@@ -7,7 +7,9 @@ import '../../support/diary_samples.dart';
 import '../../support/fakes.dart';
 
 void main() {
-  testWidgets('shows the meal total and each entry with its line (UF-002)', (tester) async {
+  testWidgets('shows the meal total and each entry with its line (UF-002)', (
+    tester,
+  ) async {
     final repository = FakeEntryRepository();
     await repository.save(entryOf(id: 'a', quantity: 150)); // 300 kcal
     await repository.save(entryOf(id: 'b', meal: Meal.lunch)); // another meal
@@ -45,7 +47,9 @@ void main() {
     expect(find.text('No entries'), findsOneWidget);
   });
 
-  testWidgets('tapping an entry opens it; "Add product" opens Add entry', (tester) async {
+  testWidgets('tapping an entry opens it; "Add product" opens Add entry', (
+    tester,
+  ) async {
     final repository = FakeEntryRepository();
     await repository.save(entryOf(id: 'a'));
     final opened = <String>[];

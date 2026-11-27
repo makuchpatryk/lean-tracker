@@ -32,22 +32,37 @@ Future<void> tapVisible(WidgetTester tester, Finder target) async {
 }
 
 String get quantityText =>
-    (find.byType(TextField).evaluate().single.widget as TextField).controller?.text ?? '';
+    (find.byType(TextField).evaluate().single.widget as TextField)
+        .controller
+        ?.text ??
+    '';
 
 void main() {
-  testWidgets('an invalid quantity shows the UF-003 error and disables Save', (tester) async {
+  testWidgets('an invalid quantity shows the UF-003 error and disables Save', (
+    tester,
+  ) async {
     await pumpCreate(tester);
 
     for (final text in ['0', '10000.1', '1.25', '']) {
       await tester.enterText(find.byType(TextField), text);
       await tester.pump();
 
-      expect(find.text('Enter a quantity from 0.1 to 10000.'), findsOneWidget, reason: text);
-      expect(tester.widget<FilledButton>(saveButton).onPressed, isNull, reason: text);
+      expect(
+        find.text('Enter a quantity from 0.1 to 10000.'),
+        findsOneWidget,
+        reason: text,
+      );
+      expect(
+        tester.widget<FilledButton>(saveButton).onPressed,
+        isNull,
+        reason: text,
+      );
     }
   });
 
-  testWidgets('150 g of a 200 kcal product previews 300 kcal (FR-004)', (tester) async {
+  testWidgets('150 g of a 200 kcal product previews 300 kcal (FR-004)', (
+    tester,
+  ) async {
     await pumpCreate(tester);
 
     await tester.enterText(find.byType(TextField), '150');
@@ -60,26 +75,34 @@ void main() {
     expect(tester.widget<FilledButton>(saveButton).onPressed, isNotNull);
   });
 
-  testWidgets('a product without a serving size has no serving chip (BR-006)', (tester) async {
+  testWidgets('a product without a serving size has no serving chip (BR-006)', (
+    tester,
+  ) async {
     await pumpCreate(tester);
 
     expect(find.byType(ChoiceChip), findsNWidgets(1 + Meal.values.length));
     expect(find.textContaining('serving'), findsNothing);
   });
 
-  testWidgets('a product with a serving size offers a serving chip and previews it (BR-006)', (
+  testWidgets(
+    'a product with a serving size offers a serving chip and previews it (BR-006)',
+    (tester) async {
+      await pumpCreate(tester, serving: true);
+
+      await tapVisible(tester, find.text('serving (30 g)'));
+      await tester.enterText(find.byType(TextField), '2');
+      await tester.pump();
+
+      expect(
+        find.text('60 kcal'),
+        findsOneWidget,
+      ); // 2 x 30 g at 100 kcal / 100 g
+    },
+  );
+
+  testWidgets('the − and + buttons step 10 g and clamp at the limits', (
     tester,
   ) async {
-    await pumpCreate(tester, serving: true);
-
-    await tapVisible(tester, find.text('serving (30 g)'));
-    await tester.enterText(find.byType(TextField), '2');
-    await tester.pump();
-
-    expect(find.text('60 kcal'), findsOneWidget); // 2 x 30 g at 100 kcal / 100 g
-  });
-
-  testWidgets('the − and + buttons step 10 g and clamp at the limits', (tester) async {
     await pumpCreate(tester);
 
     await tester.tap(find.byTooltip('Increase quantity'));
@@ -97,7 +120,9 @@ void main() {
     expect(quantityText, '0.1');
   });
 
-  testWidgets('Save stores the entry with its snapshot and goes back', (tester) async {
+  testWidgets('Save stores the entry with its snapshot and goes back', (
+    tester,
+  ) async {
     final repository = await pumpCreate(tester);
 
     await tester.enterText(find.byType(TextField), '150');
@@ -114,7 +139,9 @@ void main() {
     expect(find.text('base page'), findsOneWidget);
   });
 
-  testWidgets('a failed save shows "Could not save entry." and stays', (tester) async {
+  testWidgets('a failed save shows "Could not save entry." and stays', (
+    tester,
+  ) async {
     final repository = FakeEntryRepository()..failSaves = true;
     await pumpCreate(tester, repository: repository);
 
@@ -141,26 +168,29 @@ void main() {
       repository: repository,
     );
 
-    testWidgets('shows the stored values and saves only quantity, unit, meal and date (BR-007)', (
+    testWidgets(
+      'shows the stored values and saves only quantity, unit, meal and date (BR-007)',
+      (tester) async {
+        await pumpEdit(tester);
+        expect(quantityText, '2');
+        expect(find.text('Served'), findsOneWidget);
+
+        await tapVisible(tester, find.text('Dinner'));
+        await tester.enterText(find.byType(TextField), '3');
+        await tester.pump();
+        await tapVisible(tester, saveButton);
+        await tester.pumpAndSettle();
+
+        final saved = repository.stored.single;
+        expect(saved.quantity, 3);
+        expect(saved.meal, Meal.dinner);
+        expect(saved.snapshot, servingProduct);
+      },
+    );
+
+    testWidgets('Cancel in the delete confirmation keeps the entry', (
       tester,
     ) async {
-      await pumpEdit(tester);
-      expect(quantityText, '2');
-      expect(find.text('Served'), findsOneWidget);
-
-      await tapVisible(tester, find.text('Dinner'));
-      await tester.enterText(find.byType(TextField), '3');
-      await tester.pump();
-      await tapVisible(tester, saveButton);
-      await tester.pumpAndSettle();
-
-      final saved = repository.stored.single;
-      expect(saved.quantity, 3);
-      expect(saved.meal, Meal.dinner);
-      expect(saved.snapshot, servingProduct);
-    });
-
-    testWidgets('Cancel in the delete confirmation keeps the entry', (tester) async {
       await pumpEdit(tester);
 
       await tapVisible(tester, find.text('Delete entry'));
@@ -173,7 +203,9 @@ void main() {
       expect(find.byType(EntryFormScreen), findsOneWidget);
     });
 
-    testWidgets('Delete in the confirmation removes the entry and goes back', (tester) async {
+    testWidgets('Delete in the confirmation removes the entry and goes back', (
+      tester,
+    ) async {
       await pumpEdit(tester);
 
       await tapVisible(tester, find.text('Delete entry'));

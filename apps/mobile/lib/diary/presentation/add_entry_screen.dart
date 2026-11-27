@@ -71,11 +71,19 @@ class AddEntryScreen extends ConsumerWidget {
                         children: [
                           Text(
                             product.name,
-                            style: nunito(16, AppWeights.bold, color: palette.ink),
+                            style: nunito(
+                              16,
+                              AppWeights.bold,
+                              color: palette.ink,
+                            ),
                           ),
                           Text(
                             format.productInfo(product),
-                            style: nunito(13, AppWeights.regular, color: palette.muted),
+                            style: nunito(
+                              13,
+                              AppWeights.regular,
+                              color: palette.muted,
+                            ),
                           ),
                         ],
                       ),

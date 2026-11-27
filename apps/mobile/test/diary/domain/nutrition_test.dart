@@ -14,10 +14,13 @@ void main() {
     expect(n.carbs, 45);
   });
 
-  test('2 servings of a 30 g serving, 100 kcal/100 g, are 60 g and 60 kcal (FR-004)', () {
-    expect(baseQuantity(servingProduct, 2, EntryUnit.serving), 60);
-    expect(entryNutrition(servingProduct, 2, EntryUnit.serving).kcal, 60);
-  });
+  test(
+    '2 servings of a 30 g serving, 100 kcal/100 g, are 60 g and 60 kcal (FR-004)',
+    () {
+      expect(baseQuantity(servingProduct, 2, EntryUnit.serving), 60);
+      expect(entryNutrition(servingProduct, 2, EntryUnit.serving).kcal, 60);
+    },
+  );
 
   test('ml uses the same formula, with no conversion (BR-006)', () {
     final n = entryNutrition(juiceProduct, 250, EntryUnit.ml);
@@ -28,11 +31,15 @@ void main() {
   });
 
   test('values are not rounded', () {
-    expect(entryNutrition(plainProduct, 0.1, EntryUnit.g).kcal, closeTo(0.2, 1e-9));
+    expect(
+      entryNutrition(plainProduct, 0.1, EntryUnit.g).kcal,
+      closeTo(0.2, 1e-9),
+    );
   });
 
   test('Nutrition adds field by field and zero is neutral', () {
-    final sum = Nutrition.zero +
+    final sum =
+        Nutrition.zero +
         entryNutrition(plainProduct, 100, EntryUnit.g) +
         entryNutrition(plainProduct, 50, EntryUnit.g);
 

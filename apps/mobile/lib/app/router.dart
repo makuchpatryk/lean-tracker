@@ -168,8 +168,9 @@ final routerProvider = Provider<GoRouter>((ref) {
 /// The `meal` (path or query) and `date` (query) of a Diary child route, or null when either is not a
 /// known value. A redirect sends such a route to the Diary, so a builder only sees valid ones.
 ({Meal meal, LocalDate date})? _mealAndDate(GoRouterState state) {
-  final meal = Meal.values.asNameMap()[state.pathParameters['meal'] ??
-      state.uri.queryParameters['meal']];
+  final meal =
+      Meal.values.asNameMap()[state.pathParameters['meal'] ??
+          state.uri.queryParameters['meal']];
   final date = LocalDate.parseIso(state.uri.queryParameters['date'] ?? '');
   if (meal == null || date == null) return null;
   return (meal: meal, date: date);

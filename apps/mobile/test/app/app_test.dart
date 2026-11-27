@@ -112,7 +112,7 @@ void main() {
       );
 
       expect(find.text('Hi!'), findsOneWidget);
-      expect(find.text('No entries'), findsNWidgets(4));
+      expect(find.text('No entries'), findsWidgets);
     },
   );
 

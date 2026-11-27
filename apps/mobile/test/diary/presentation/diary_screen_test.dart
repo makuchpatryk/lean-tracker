@@ -27,28 +27,32 @@ Future<FakeEntryRepository> pumpScreen(
 );
 
 void main() {
-  testWidgets('300 + 200 kcal against 2000 shows consumed 500 and remaining 1500 (FR-003)', (
-    tester,
-  ) async {
-    final repository = FakeEntryRepository();
-    await repository.save(entryOf(id: 'a', quantity: 150)); // 300 kcal
-    await repository.save(entryOf(id: 'b', meal: Meal.lunch)); // 200 kcal
+  testWidgets(
+    '300 + 200 kcal against 2000 shows consumed 500 and remaining 1500 (FR-003)',
+    (tester) async {
+      final repository = FakeEntryRepository();
+      await repository.save(entryOf(id: 'a', quantity: 150)); // 300 kcal
+      await repository.save(entryOf(id: 'b', meal: Meal.lunch)); // 200 kcal
 
-    await pumpScreen(tester, repository: repository);
+      await pumpScreen(tester, repository: repository);
 
-    expect(find.text('1,500'), findsOneWidget);
-    expect(find.text('kcal left'), findsOneWidget);
-    expect(find.text('Eaten 500 of 2,000 kcal'), findsOneWidget);
-  });
+      expect(find.text('1,500'), findsOneWidget);
+      expect(find.text('kcal left'), findsOneWidget);
+      expect(find.text('Eaten 500 of 2,000 kcal'), findsOneWidget);
+    },
+  );
 
-  testWidgets('a day over the goal shows remaining with a minus sign (FR-003)', (tester) async {
-    final repository = FakeEntryRepository();
-    await repository.save(entryOf(quantity: 1500)); // 3000 kcal
+  testWidgets(
+    'a day over the goal shows remaining with a minus sign (FR-003)',
+    (tester) async {
+      final repository = FakeEntryRepository();
+      await repository.save(entryOf(quantity: 1500)); // 3000 kcal
 
-    await pumpScreen(tester, repository: repository);
+      await pumpScreen(tester, repository: repository);
 
-    expect(find.text('−1,000'), findsOneWidget);
-  });
+      expect(find.text('−1,000'), findsOneWidget);
+    },
+  );
 
   testWidgets('macros show consumed over goal', (tester) async {
     final repository = FakeEntryRepository();
@@ -61,24 +65,32 @@ void main() {
     expect(find.text('Carbs 45 / 240 g'), findsOneWidget);
   });
 
-  testWidgets('an empty day shows zeros, four empty meals and a plus for each (UF-002)', (
+  testWidgets(
+    'an empty day shows zeros, four empty meals and a plus for each (UF-002)',
+    (tester) async {
+      await pumpScreen(tester);
+
+      expect(find.text('2,000'), findsOneWidget);
+      expect(find.text('No entries'), findsNWidgets(4));
+      for (final meal in ['Breakfast', 'Lunch', 'Dinner', 'Snacks']) {
+        expect(find.text(meal), findsOneWidget);
+        expect(find.byTooltip('Add entry to $meal'), findsOneWidget);
+      }
+    },
+  );
+
+  testWidgets('a meal card shows its kcal, entry count and names', (
     tester,
   ) async {
-    await pumpScreen(tester);
-
-    expect(find.text('2,000'), findsOneWidget);
-    expect(find.text('No entries'), findsNWidgets(4));
-    for (final meal in ['Breakfast', 'Lunch', 'Dinner', 'Snacks']) {
-      expect(find.text(meal), findsOneWidget);
-      expect(find.byTooltip('Add entry to $meal'), findsOneWidget);
-    }
-  });
-
-  testWidgets('a meal card shows its kcal, entry count and names', (tester) async {
     final repository = FakeEntryRepository();
     await repository.save(entryOf(id: 'a', quantity: 150)); // Plain, 300 kcal
     await repository.save(
-      entryOf(id: 'b', snapshot: juiceProduct, unit: EntryUnit.ml, quantity: 250),
+      entryOf(
+        id: 'b',
+        snapshot: juiceProduct,
+        unit: EntryUnit.ml,
+        quantity: 250,
+      ),
     ); // Juice, 100 kcal
 
     await pumpScreen(tester, repository: repository);
@@ -87,7 +99,9 @@ void main() {
     expect(find.text('Plain, Juice'), findsOneWidget);
   });
 
-  testWidgets('the arrows change the day and its entries (UF-002)', (tester) async {
+  testWidgets('the arrows change the day and its entries (UF-002)', (
+    tester,
+  ) async {
     final repository = FakeEntryRepository();
     await repository.save(entryOf(id: 'next', date: day.addDays(1)));
     await pumpScreen(tester, repository: repository);
@@ -107,7 +121,9 @@ void main() {
     expect(find.text('Tuesday, November 24'), findsOneWidget);
   });
 
-  testWidgets('the plus button and the card report the meal and the date', (tester) async {
+  testWidgets('the plus button and the card report the meal and the date', (
+    tester,
+  ) async {
     final opened = <(Meal, LocalDate)>[];
     final added = <(Meal, LocalDate)>[];
     await pumpDiaryScreen(
@@ -145,7 +161,11 @@ void main() {
     await repository.save(entryOf(id: 'b'));
     await repository.save(entryOf(id: 'c', meal: Meal.lunch));
 
-    await pumpScreen(tester, repository: repository, locale: const Locale('pl'));
+    await pumpScreen(
+      tester,
+      repository: repository,
+      locale: const Locale('pl'),
+    );
 
     expect(find.text('Cześć!'), findsOneWidget);
     expect(find.text('Środa, 25 listopada'), findsOneWidget);

@@ -55,11 +55,14 @@ void main() {
       }
     });
 
-    test('the offered units are the base unit plus serving only with a serving size', () {
-      expect(unitsFor(plainProduct), [EntryUnit.g]);
-      expect(unitsFor(servingProduct), [EntryUnit.g, EntryUnit.serving]);
-      expect(unitsFor(juiceProduct), [EntryUnit.ml]);
-    });
+    test(
+      'the offered units are the base unit plus serving only with a serving size',
+      () {
+        expect(unitsFor(plainProduct), [EntryUnit.g]);
+        expect(unitsFor(servingProduct), [EntryUnit.g, EntryUnit.serving]);
+        expect(unitsFor(juiceProduct), [EntryUnit.ml]);
+      },
+    );
   });
 
   group('revise (FR-004, BR-007)', () {

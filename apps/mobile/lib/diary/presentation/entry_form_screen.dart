@@ -243,7 +243,9 @@ class _EntryFormState extends ConsumerState<_EntryForm> {
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).errorEntryNotSaved)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).errorEntryNotSaved),
+        ),
       );
     }
   }
@@ -292,11 +294,16 @@ class _EntryFormState extends ConsumerState<_EntryForm> {
                   child: AppTextField(
                     label: l10n.quantityLabel,
                     controller: _quantity,
-                    suffix: format.unit(_unit, snapshot),
+                    // The serving chip already names the unit; its long text would not fit beside the − and + buttons.
+                    suffix: _unit == EntryUnit.serving
+                        ? null
+                        : format.unit(_unit, snapshot),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    errorText: quantity == null ? l10n.errorQuantityRange : null,
+                    errorText: quantity == null
+                        ? l10n.errorQuantityRange
+                        : null,
                     onChanged: (_) => setState(() {}),
                   ),
                 ),

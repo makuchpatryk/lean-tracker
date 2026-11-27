@@ -2,7 +2,6 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lean_tracker/app/database.dart';
 import 'package:lean_tracker/diary/application/entry_repository.dart';
-import 'package:lean_tracker/diary/domain/diary_entry.dart';
 import 'package:lean_tracker/diary/domain/meal.dart';
 import 'package:lean_tracker/diary/domain/units.dart';
 import 'package:lean_tracker/diary/infrastructure/drift_entry_repository.dart';
@@ -20,27 +19,30 @@ void main() {
 
   tearDown(() => db.close());
 
-  test('saves and reads back every field, with a null serving size and source ref', () async {
-    final entry = entryOf(
-      meal: Meal.dinner,
-      quantity: 150.5,
-      updatedAt: DateTime.utc(2026, 11, 25, 18, 30, 15),
-    );
+  test(
+    'saves and reads back every field, with a null serving size and source ref',
+    () async {
+      final entry = entryOf(
+        meal: Meal.dinner,
+        quantity: 150.5,
+        updatedAt: DateTime.utc(2026, 11, 25, 18, 30, 15),
+      );
 
-    expect(await repository.save(entry), isA<Saved>());
-    final read = await repository.findById('e1');
+      expect(await repository.save(entry), isA<Saved>());
+      final read = await repository.findById('e1');
 
-    expect(read, isNotNull);
-    expect(read?.snapshot, plainProduct);
-    expect(read?.snapshot.servingSize, isNull);
-    expect(read?.snapshot.sourceRef, isNull);
-    expect(read?.meal, Meal.dinner);
-    expect(read?.entryDate, day);
-    expect(read?.quantity, 150.5);
-    expect(read?.unit, EntryUnit.g);
-    expect(read?.updatedAt, DateTime.utc(2026, 11, 25, 18, 30, 15));
-    expect(read?.deletedAt, isNull);
-  });
+      expect(read, isNotNull);
+      expect(read?.snapshot, plainProduct);
+      expect(read?.snapshot.servingSize, isNull);
+      expect(read?.snapshot.sourceRef, isNull);
+      expect(read?.meal, Meal.dinner);
+      expect(read?.entryDate, day);
+      expect(read?.quantity, 150.5);
+      expect(read?.unit, EntryUnit.g);
+      expect(read?.updatedAt, DateTime.utc(2026, 11, 25, 18, 30, 15));
+      expect(read?.deletedAt, isNull);
+    },
+  );
 
   test('saves and reads back a serving size and a source ref', () async {
     await repository.save(
@@ -80,9 +82,15 @@ void main() {
     });
 
     test('orders by updatedAt, then id', () async {
-      await repository.save(entryOf(id: 'b', updatedAt: DateTime.utc(2026, 11, 25, 9)));
-      await repository.save(entryOf(id: 'c', updatedAt: DateTime.utc(2026, 11, 25, 8)));
-      await repository.save(entryOf(id: 'a', updatedAt: DateTime.utc(2026, 11, 25, 9)));
+      await repository.save(
+        entryOf(id: 'b', updatedAt: DateTime.utc(2026, 11, 25, 9)),
+      );
+      await repository.save(
+        entryOf(id: 'c', updatedAt: DateTime.utc(2026, 11, 25, 8)),
+      );
+      await repository.save(
+        entryOf(id: 'a', updatedAt: DateTime.utc(2026, 11, 25, 9)),
+      );
 
       final entries = await repository.watchDay(day).first;
 
@@ -114,16 +122,19 @@ void main() {
       expect(await other.findById('e1'), isNull);
     });
 
-    test("saving an id owned by user A from user B leaves A's row unchanged", () async {
-      await repository.save(entryOf(quantity: 100));
+    test(
+      "saving an id owned by user A from user B leaves A's row unchanged",
+      () async {
+        await repository.save(entryOf(quantity: 100));
 
-      await other.save(entryOf(quantity: 999, meal: Meal.snack));
+        await other.save(entryOf(quantity: 999, meal: Meal.snack));
 
-      final mine = await repository.findById('e1');
-      expect(mine?.quantity, 100);
-      expect(mine?.meal, Meal.breakfast);
-      expect(await other.findById('e1'), isNull);
-    });
+        final mine = await repository.findById('e1');
+        expect(mine?.quantity, 100);
+        expect(mine?.meal, Meal.breakfast);
+        expect(await other.findById('e1'), isNull);
+      },
+    );
   });
 
   test('a row with an unknown stored value is skipped, not a crash', () async {
@@ -139,7 +150,7 @@ void main() {
   });
 
   test('a database error becomes SaveFailed', () async {
-    await db.close();
+    await db.customStatement('DROP TABLE diary_entries');
 
     expect(await repository.save(entryOf()), isA<SaveFailed>());
   });

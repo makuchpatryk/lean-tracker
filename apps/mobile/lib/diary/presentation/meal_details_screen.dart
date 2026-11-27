@@ -69,11 +69,19 @@ class MealDetailsScreen extends ConsumerWidget {
                       children: [
                         Text(
                           format.whole(total.kcal),
-                          style: nunito(40, AppWeights.extraBold, color: palette.ink),
+                          style: nunito(
+                            40,
+                            AppWeights.extraBold,
+                            color: palette.ink,
+                          ),
                         ),
                         Text(
                           l10n.mealKcalLabel,
-                          style: nunito(15, AppWeights.semiBold, color: palette.muted),
+                          style: nunito(
+                            15,
+                            AppWeights.semiBold,
+                            color: palette.muted,
+                          ),
                         ),
                       ],
                     ),
@@ -84,7 +92,11 @@ class MealDetailsScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Text(
                         l10n.noEntries,
-                        style: nunito(15, AppWeights.regular, color: palette.muted),
+                        style: nunito(
+                          15,
+                          AppWeights.regular,
+                          color: palette.muted,
+                        ),
                       ),
                     ),
                   for (final entry in entries) ...[
@@ -149,7 +161,11 @@ class _EntryTile extends StatelessWidget {
                       ),
                       Text(
                         line,
-                        style: nunito(13, AppWeights.regular, color: palette.muted),
+                        style: nunito(
+                          13,
+                          AppWeights.regular,
+                          color: palette.muted,
+                        ),
                       ),
                     ],
                   ),

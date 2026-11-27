@@ -62,18 +62,30 @@ class MealCard extends StatelessWidget {
                     children: [
                       Text(
                         name,
-                        style: nunito(17, AppWeights.extraBold, color: palette.ink),
+                        style: nunito(
+                          17,
+                          AppWeights.extraBold,
+                          color: palette.ink,
+                        ),
                       ),
                       Text(
                         summary,
-                        style: nunito(14, AppWeights.semiBold, color: palette.ink),
+                        style: nunito(
+                          14,
+                          AppWeights.semiBold,
+                          color: palette.ink,
+                        ),
                       ),
                       if (entries.isNotEmpty)
                         Text(
                           entries.map((e) => e.snapshot.name).join(', '),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: nunito(13, AppWeights.regular, color: palette.muted),
+                          style: nunito(
+                            13,
+                            AppWeights.regular,
+                            color: palette.muted,
+                          ),
                         ),
                     ],
                   ),
@@ -85,7 +97,11 @@ class MealCard extends StatelessWidget {
                     minWidth: AppSpacing.touchTarget,
                     minHeight: AppSpacing.touchTarget,
                   ),
-                  icon: Icon(Icons.add_circle, color: palette.primary, size: 32),
+                  icon: Icon(
+                    Icons.add_circle,
+                    color: palette.primary,
+                    size: 32,
+                  ),
                 ),
               ],
             ),

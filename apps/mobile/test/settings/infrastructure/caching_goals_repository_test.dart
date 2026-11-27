@@ -62,19 +62,25 @@ void main() {
     expect(cache.goals['user-a'], other);
   });
 
-  test('a save that did not reach the API leaves the cache unchanged', () async {
-    cache.goals['user-a'] = goals;
-    remote.saveResult = const GoalsOffline();
+  test(
+    'a save that did not reach the API leaves the cache unchanged',
+    () async {
+      cache.goals['user-a'] = goals;
+      remote.saveResult = const GoalsOffline();
 
-    expect(await repository.save(other), isA<GoalsOffline>());
-    expect(cache.goals['user-a'], goals);
-  });
+      expect(await repository.save(other), isA<GoalsOffline>());
+      expect(cache.goals['user-a'], goals);
+    },
+  );
 
-  test('a rejected save passes through and leaves the cache unchanged', () async {
-    cache.goals['user-a'] = goals;
-    remote.saveResult = const GoalsRejected();
+  test(
+    'a rejected save passes through and leaves the cache unchanged',
+    () async {
+      cache.goals['user-a'] = goals;
+      remote.saveResult = const GoalsRejected();
 
-    expect(await repository.save(other), isA<GoalsRejected>());
-    expect(cache.goals['user-a'], goals);
-  });
+      expect(await repository.save(other), isA<GoalsRejected>());
+      expect(cache.goals['user-a'], goals);
+    },
+  );
 }

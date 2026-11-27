@@ -16,13 +16,16 @@ void main() {
     await repository.save(entryOf());
   });
 
-  test('a delete is soft: the row stays with deletedAt and updatedAt set', () async {
-    expect(await deleteEntry('e1'), isA<EntryDeleted>());
+  test(
+    'a delete is soft: the row stays with deletedAt and updatedAt set',
+    () async {
+      expect(await deleteEntry('e1'), isA<EntryDeleted>());
 
-    final row = repository.stored.single;
-    expect(row.deletedAt, clock.current);
-    expect(row.updatedAt, clock.current);
-  });
+      final row = repository.stored.single;
+      expect(row.deletedAt, clock.current);
+      expect(row.updatedAt, clock.current);
+    },
+  );
 
   test('the deleted entry is gone from watchDay', () async {
     await deleteEntry('e1');

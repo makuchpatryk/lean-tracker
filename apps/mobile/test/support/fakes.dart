@@ -159,7 +159,8 @@ class FakeEntryRepository implements EntryRepository {
 
 /// A clock that stands still until a test moves it.
 class FakeClock implements Clock {
-  FakeClock([DateTime? start]) : current = start ?? DateTime.utc(2026, 11, 25, 8);
+  FakeClock([DateTime? start])
+    : current = start ?? DateTime.utc(2026, 11, 25, 8);
 
   DateTime current;
 

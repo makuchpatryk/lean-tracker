@@ -48,7 +48,9 @@ class DiaryFormat {
   /// What a screen reader says for [remaining]: "minus 120", never a symbol it may skip.
   String remainingSpoken(double kcal) {
     final rounded = kcal.round();
-    return rounded < 0 ? '${l10n.a11yNegative} ${_whole.format(-rounded)}' : _whole.format(rounded);
+    return rounded < 0
+        ? '${l10n.a11yNegative} ${_whole.format(-rounded)}'
+        : _whole.format(rounded);
   }
 
   String mealName(Meal meal) => switch (meal) {
